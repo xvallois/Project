@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "FX volatility monitoring & research assistant"
 requires-python = ">=3.11"
 dependencies = ["pydantic>=2", "pyyaml", "pandas", "pyarrow", "scipy",
-                "python-dateutil"]
+                "python-dateutil", "duckdb"]
 
 [project.optional-dependencies]
 bbg = ["blpapi"]
