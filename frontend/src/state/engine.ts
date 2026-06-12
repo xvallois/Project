@@ -3,6 +3,7 @@ import { create } from "zustand";
 import { connectWs, getFeed, getHealth, postBlotter, postInvestigate,
   postTransition, type ResearchBrief, type ServerCard, type WsEnvelope }
   from "../api/client";
+import { useBlotter } from "./blotter";
 import { useWorkspaces } from "./stores";
 
 interface EngineStore {
@@ -52,7 +53,7 @@ export const useEngine = create<EngineStore>((set, get) => ({
       linked_opportunity_id: c.id,
       entry_thesis: `${c.headline} — ` + c.evidence
         .map((e) => `${e.label}=${e.value} [${e.provenance}]`).join("; "),
-    }).catch(() => undefined);
+    }).then(() => useBlotter.getState().refresh()).catch(() => undefined);
     get().transition(c.id, "acted");
   },
 }));

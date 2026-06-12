@@ -1,10 +1,11 @@
 /** BLOT — the unified decision ledger (locked decision #4). */
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { PanelParams } from "../shell/DockHost";
 import { useBlotter } from "../state/blotter";
 
 export function BlotPanel(_: { params: PanelParams }) {
-  const { rows, close } = useBlotter();
+  const { rows, close, refresh } = useBlotter();
+  useEffect(() => refresh(), [refresh]);
   const [closing, setClosing] = useState<string | null>(null);
   const [pnl, setPnl] = useState("");
   const [note, setNote] = useState("");

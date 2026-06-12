@@ -38,6 +38,7 @@ On the desk: `VW_PROVIDER=bbg` (Bloomberg DAPI) or `bql` (BQuant), and
 | `VW_SEED_DAYS` | `120` | mock-history seed on first boot (mock only) |
 | `VW_ANALYST` | `auto` | `auto` \| `claude` \| `stub` \| `disabled` |
 | `ANTHROPIC_API_KEY` | — | enables the live Analyst |
+| `VW_CORS_ORIGINS` | localhost:5173 dev origins | comma-separated origins allowed to call the sidecar (set on the desk; never `*`) |
 | `VW_MODEL_TRIAGE/INVESTIGATE/DEEP` | haiku/sonnet/opus | per-tier model override |
 
 ## Invariants (enforced, see contracts/)
