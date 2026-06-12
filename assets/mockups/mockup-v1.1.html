@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>volwatch workstation — v1.1 mockup (MORNING mode, CANVAS monitor)</title>
+<style>
+:root{
+  --ink:#0B0E14; --panel:#11151D; --chrome:#1A2029; --line:#232B37;
+  --text:#D7DEE8; --muted:#8B95A6; --amber:#E8A33D;
+  --up:#3FB68B; --down:#E0586E;
+  --lA:#5B9DD9; --lB:#C2884E;
+  --mono:'IBM Plex Mono',ui-monospace,Consolas,monospace;
+  --sans:'IBM Plex Sans',-apple-system,'Segoe UI',sans-serif;
+}
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
+*{box-sizing:border-box;margin:0}
+html,body{height:100%}
+body{background:var(--ink);color:var(--text);font:12px/1.45 var(--sans);overflow:hidden}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.mut{color:var(--muted)}.pos{color:var(--up)}.neg{color:var(--down)}
+.app{display:grid;grid-template-rows:36px 1fr 24px;height:100vh}
+
+/* top */
+.top{display:flex;align-items:center;gap:14px;background:var(--chrome);
+  border-bottom:1px solid var(--line);padding:0 10px}
+.logo{font:600 12px var(--mono);letter-spacing:.08em;color:var(--amber)}
+.wstab{padding:4px 12px;font:500 11px var(--sans);letter-spacing:.06em;
+  color:var(--muted);border:1px solid transparent;border-radius:4px}
+.wstab.act{color:var(--text);background:var(--panel);border-color:var(--line)}
+.wstab.act::after{content:" *";color:var(--amber)}
+.cmdslot{flex:1;max-width:520px;margin:0 auto;display:flex;align-items:center;gap:8px;
+  background:var(--ink);border:1px solid #4d4022;border-radius:4px;
+  padding:4px 10px;font:12px var(--mono);color:var(--text)}
+.cmdslot b{color:var(--amber);font-weight:500}
+.kbd{font:11px var(--mono);border:1px solid var(--line);border-radius:3px;
+  padding:0 5px;color:var(--muted)}
+.clocks{display:flex;gap:12px;font:11px var(--mono);color:var(--muted)}
+.clocks b{color:var(--text);font-weight:500}
+
+/* main grid */
+.main{display:grid;grid-template-columns:40px 1fr;min-height:0}
+.rail{background:var(--chrome);border-right:1px solid var(--line);
+  display:flex;flex-direction:column;align-items:center;padding-top:8px;gap:4px}
+.rico{width:30px;height:30px;display:grid;place-items:center;border-radius:4px;
+  font:500 9px var(--mono);color:var(--muted)}
+.rico.act{color:var(--amber);background:var(--panel)}
+.dock{display:grid;min-height:0;padding:4px;gap:4px;
+  grid-template-columns:360px 1fr 330px;
+  grid-template-rows:1.25fr 1fr;
+  grid-template-areas:"opps heat asst" "opps row2 asst"}
+.p{background:var(--panel);border:1px solid var(--line);border-radius:4px;
+  display:flex;flex-direction:column;min-height:0;min-width:0}
+.ph{height:28px;display:flex;align-items:center;gap:8px;padding:0 8px;
+  background:var(--chrome);border-bottom:1px solid var(--line);
+  border-radius:4px 4px 0 0;flex:none}
+.ph .mn{font:500 10px var(--mono);color:var(--amber);letter-spacing:.06em}
+.ph .tt{font:500 11px var(--sans)}
+.ph .badge{font:600 9px var(--mono);color:var(--ink);background:var(--muted);
+  border-radius:3px;padding:0 4px;opacity:.85}
+.link{width:14px;height:14px;border-radius:3px;display:grid;place-items:center;
+  font:600 8px var(--mono);color:#0b0e14;margin-left:auto}
+.lA{background:var(--lA)}.none{background:transparent;border:1px solid var(--line);color:var(--muted)}
+.age{font:10px var(--mono);color:var(--muted)}
+.pb{flex:1;min-height:0;overflow:hidden;position:relative}
+
+/* ---- OPPS feed ---- */
+#opps{grid-area:opps}
+.fchips{display:flex;gap:4px;padding:6px 8px;border-bottom:1px solid var(--line);flex:none}
+.fchip{font:10px var(--mono);border:1px solid var(--line);border-radius:3px;
+  padding:1px 7px;color:var(--muted)}
+.fchip.act{color:var(--amber);border-color:#4d4022}
+.feed{overflow:auto;flex:1}
+.card{border-bottom:1px solid var(--line);padding:8px 10px}
+.card.sel{background:#141b27;border-left:2px solid var(--amber);padding-left:8px}
+.crow{display:flex;align-items:center;gap:6px;margin-bottom:3px}
+.band{font:600 9px var(--mono);letter-spacing:.05em;border-radius:3px;padding:1px 6px}
+.b-act{background:rgba(232,163,61,.16);color:var(--amber)}
+.b-wat{background:rgba(91,157,217,.14);color:var(--lA)}
+.b-spec{background:rgba(139,149,166,.14);color:var(--muted)}
+.ctype{font:500 10px var(--sans);letter-spacing:.05em;color:var(--muted)}
+.cpair{font:500 11px var(--mono);margin-left:auto}
+.chead{font:500 12px var(--sans);margin-bottom:4px}
+.cev{font:10px var(--mono);color:var(--muted);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.cev .spark{flex:none}
+.cwhy{font-size:11px;color:var(--muted);margin-top:4px}
+.cwhy b{color:#caa45c;font-weight:500}
+.cconf{font:10px var(--mono);color:#6f7a8c;margin-top:4px}
+.cact{display:flex;gap:4px;margin-top:6px}
+.btn{font:10px var(--mono);border:1px solid var(--line);border-radius:3px;
+  padding:2px 7px;color:var(--muted)}
+.btn.pri{color:var(--amber);border-color:#4d4022}
+.stand{padding:5px 10px;font:10px var(--mono);color:#6f7a8c;
+  border-bottom:1px solid var(--line)}
+.divider{padding:3px 10px;font:9px var(--mono);letter-spacing:.1em;
+  color:#5b6575;border-bottom:1px solid var(--line);background:#0e1219}
+
+/* ---- VHEAT ---- */
+#heat{grid-area:heat}
+.lens{display:flex;gap:4px;margin-left:8px}
+.lens .tog{font:10px var(--mono);border:1px solid var(--line);border-radius:3px;
+  padding:1px 7px;color:var(--muted)}
+.lens .tog.act{color:var(--amber);border-color:#4d4022}
+.hwrap{position:absolute;inset:8px 10px 24px 10px;display:grid;
+  grid-template-columns:34px repeat(5,1fr);grid-template-rows:18px repeat(9,1fr);gap:2px}
+.hlabel{display:grid;place-items:center;font:9px var(--mono);color:var(--muted)}
+.cell{border-radius:2px;display:grid;place-items:center;
+  font:10px var(--mono);font-variant-numeric:tabular-nums;color:#dfe6f0}
+.cell.hi{outline:1.5px solid var(--amber);color:#fff}
+.legend{position:absolute;bottom:4px;left:10px;right:10px;display:flex;
+  align-items:center;gap:8px;font:9px var(--mono);color:var(--muted)}
+.lbar{flex:1;height:6px;border-radius:3px;
+  background:linear-gradient(90deg,#1f6f5c,#22443c,#11151D,#5b2733,#a23a4d)}
+
+/* ---- row2: SMIL cone + RCHP ---- */
+#row2{grid-area:row2;display:grid;grid-template-columns:1.2fr 1fr;gap:4px;
+  background:transparent;border:none}
+.chartft{position:absolute;left:10px;bottom:5px;font:10px var(--mono);color:var(--muted)}
+.rch{display:grid;grid-template-rows:repeat(4,1fr);gap:1px;background:var(--line);height:100%}
+.rrow{background:var(--panel);display:grid;grid-template-columns:64px 1fr 52px;
+  align-items:center;padding:0 10px;gap:8px;font:10px var(--mono)}
+.rrow .lab{color:var(--muted);font-family:var(--sans);font-size:10px}
+.bar{height:8px;border-radius:2px;background:#1a212c;position:relative}
+.bar i{position:absolute;top:0;bottom:0;border-radius:2px}
+.bar .mid{position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:#39455a}
+
+/* ---- ASST ---- */
+#asst{grid-area:asst}
+.ctxbar{display:flex;flex-wrap:wrap;gap:4px;padding:6px 8px;
+  border-bottom:1px solid var(--line);flex:none}
+.chip{font:9px var(--mono);border:1px solid #2a3445;border-radius:3px;
+  padding:1px 6px;color:#9fb4d4;background:#131a26}
+.chip.mode{color:var(--amber);border-color:#4d4022;background:#1a1610}
+.thread{flex:1;overflow:auto;padding:8px 10px;font-size:11px}
+.msg{margin-bottom:10px}
+.msg .who{font:500 9px var(--mono);letter-spacing:.08em;color:var(--muted);margin-bottom:2px}
+.msg.an .who{color:var(--amber)}
+.msg p{color:#c4ccd9}
+.prov{font:10px var(--mono);color:#7e9bc4;border-bottom:1px dotted #3a4d6b;cursor:help}
+.judg{color:#b9a47c;font-style:italic}
+.toolt{font:9px var(--mono);color:#5b6575;margin-top:3px}
+.composer{border-top:1px solid var(--line);padding:6px 8px;display:flex;gap:6px;
+  font:11px var(--mono);color:var(--muted);flex:none}
+.composer .box{flex:1;background:var(--ink);border:1px solid var(--line);
+  border-radius:3px;padding:4px 8px}
+
+/* ---- command palette overlay ---- */
+.palette{position:fixed;left:50%;top:96px;transform:translateX(-50%);width:560px;
+  background:#10141c;border:1px solid #3a3225;border-radius:6px;
+  box-shadow:0 18px 60px rgba(0,0,0,.6);z-index:50}
+.pin{display:flex;align-items:center;gap:8px;padding:9px 12px;
+  border-bottom:1px solid var(--line);font:13px var(--mono)}
+.pin b{color:var(--amber)}
+.pres{padding:4px 0}
+.pitem{display:flex;align-items:center;gap:10px;padding:6px 12px;font-size:12px}
+.pitem.sel{background:#1a2230}
+.pitem .pm{font:500 10px var(--mono);color:var(--amber);width:44px}
+.pitem .pd{color:var(--muted);margin-left:auto;font:10px var(--mono)}
+.pfoot{display:flex;gap:14px;padding:6px 12px;border-top:1px solid var(--line);
+  font:9px var(--mono);color:#5b6575}
+
+/* status */
+.status{display:flex;align-items:center;gap:18px;background:var(--chrome);
+  border-top:1px solid var(--line);padding:0 12px;font:10px var(--mono);color:var(--muted)}
+.status .live{color:var(--up)}.status .warnt{color:var(--amber)}.sp{flex:1}
+.mono3{font:9px var(--mono);color:#5b6575;letter-spacing:.06em}
+</style></head><body>
+<div class="app">
+
+<div class="top">
+  <span class="logo">VOLWATCH</span>
+  <span class="wstab act">MORN</span><span class="wstab">ECB</span>
+  <span class="wstab">NFP</span><span class="wstab">G10RV</span>
+  <span class="wstab">RISK</span>
+  <div class="cmdslot"><b>›</b> smil eurj<span style="opacity:.4">py 3M</span>
+    <span style="margin-left:auto" class="kbd">⌘K</span></div>
+  <span class="mono3">CANVAS · 1/3</span>
+  <div class="clocks"><span>NYC <b>03:42</b></span><span>LDN <b>08:42</b></span>
+    <span>TYO <b>16:42</b></span></div>
+</div>
+
+<div class="main">
+  <div class="rail">
+    <div class="rico act">OPPS</div><div class="rico act">VHEAT</div>
+    <div class="rico act">SMIL</div><div class="rico act">RCHP</div>
+    <div class="rico">RVSC</div><div class="rico">TERM</div>
+    <div class="rico act">ASST</div><div class="rico">SIGS</div>
+    <div class="rico">BLOT</div><div class="rico">POSN</div>
+    <div class="rico">HLTH</div>
+    <div class="rico" style="margin-top:auto;margin-bottom:8px">KEYS</div>
+  </div>
+
+  <div class="dock">
+
+    <!-- OPPORTUNITY FEED -->
+    <div class="p" id="opps">
+      <div class="ph"><span class="mn">OPPS</span><span class="tt">Opportunity feed</span>
+        <span class="badge">Alt·1</span><span class="link none">–</span>
+        <span class="age">09:30 triage</span></div>
+      <div class="fchips">
+        <span class="fchip act">ALL 7</span><span class="fchip">ACTIONABLE 2</span>
+        <span class="fchip">WATCH 3</span><span class="fchip">SPEC 2</span>
+        <span class="fchip">EUR·JPY</span>
+      </div>
+      <div class="feed">
+        <div class="divider">SINCE YOU LEFT · 2 NEW · 1 INVALIDATED</div>
+
+        <div class="card sel">
+          <div class="crow"><span class="band b-act">ACTIONABLE</span>
+            <span class="ctype">SKEW DISLOCATION</span>
+            <span class="cpair">EURJPY · 3M</span></div>
+          <div class="chead">Cross skew rich vs legs and vs 2y history</div>
+          <div class="cev">RR25 −1.41 <b style="color:#e0a0ac">p97</b> ·
+            ρ<sub>imp</sub> .68 vs ρ<sub>real</sub> .08 · beta unch −.21→−.24
+            <svg class="spark" width="62" height="14" viewBox="0 0 62 14">
+              <path d="M1 9 L9 8 L17 9 L25 7 L33 8 L41 6 L49 4 L57 2"
+              fill="none" stroke="#5B9DD9" stroke-width="1.2"/>
+              <circle cx="57" cy="2" r="1.8" fill="#E8A33D"/></svg>
+            · dq ✓</div>
+          <div class="cwhy"><b>why now</b> — one-sided spot move loaded
+            JPY-call hedging; delivered correlation hasn't followed.</div>
+          <div class="cconf">|z| 3.4 · persisted 3 cycles · models agree ·
+            backtest prior 61% (n=42)</div>
+          <div class="cact"><span class="btn pri">Investigate I</span>
+            <span class="btn">→ Workspace G</span><span class="btn">→ Blotter B</span>
+            <span class="btn">Watch W</span><span class="btn">Dismiss X</span></div>
+        </div>
+
+        <div class="card">
+          <div class="crow"><span class="band b-act">ACTIONABLE</span>
+            <span class="ctype">EVENT PRICING</span>
+            <span class="cpair">EURUSD · 1W</span></div>
+          <div class="chead">ECB bucket pricing 1.8× delivered history</div>
+          <div class="cev">implied move 0.94% vs median 0.52% (n=6) ·
+            base vol p41 · dq ✓</div>
+          <div class="cwhy"><b>analyst</b> — <span class="judg">premium partly
+            justified if guidance regime shifted in March; check the last
+            two prints before fading fully.</span></div>
+          <div class="cconf">ratio 1.81 · 1 cycle · downgrade declined: data-quality clean</div>
+        </div>
+
+        <div class="card">
+          <div class="crow"><span class="band b-wat">WATCH</span>
+            <span class="ctype">TERM ANOMALY</span>
+            <span class="cpair">USDJPY · 9M</span></div>
+          <div class="chead">9M standing +0.21vp over total-variance interp</div>
+          <div class="cev">kink p88 · fwd 6M→9M rich / 9M→1Y cheap
+            <svg class="spark" width="62" height="14" viewBox="0 0 62 14">
+              <path d="M1 10 L13 9 L25 10 L37 8 L49 5 L57 4" fill="none"
+              stroke="#5B9DD9" stroke-width="1.2"/></svg></div>
+        </div>
+
+        <div class="card">
+          <div class="crow"><span class="band b-wat">WATCH</span>
+            <span class="ctype">REGIME</span><span class="cpair">G10 USD legs</span></div>
+          <div class="chead">Realized correlation regime shift, 10d vs 60d</div>
+          <div class="cev">avg USD-leg ρ .31 → .52 · variance-ratio test 2.4σ</div>
+          <div class="cwhy"><b>analyst</b> — affects all triangle cards;
+            EURJPY card confidence held, gap source is skew not corr level.</div>
+        </div>
+
+        <div class="stand">▸ still open · AUDUSD RR cheap (4d, −0.1vp) ·
+          NZDUSD kink (2d, unch)</div>
+        <div class="card" style="opacity:.55">
+          <div class="crow"><span class="band b-spec">INVALIDATED</span>
+            <span class="ctype">VOL RISK PREMIUM</span>
+            <span class="cpair">GBPUSD · 1M</span></div>
+          <div class="chead">Closed without action · convergence −1.3vp</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VHEAT -->
+    <div class="p" id="heat">
+      <div class="ph"><span class="mn">VHEAT</span><span class="tt">EURJPY surface</span>
+        <span class="badge">Alt·2</span>
+        <div class="lens"><span class="tog">LEVEL</span><span class="tog">Δ T-1</span>
+          <span class="tog act">%ILE</span><span class="tog">3D</span></div>
+        <span class="link lA">A</span><span class="age">12s</span></div>
+      <div class="pb">
+        <div class="hwrap">
+          <div class="hlabel"></div><div class="hlabel">10P</div><div class="hlabel">25P</div>
+          <div class="hlabel">ATM</div><div class="hlabel">25C</div><div class="hlabel">10C</div>
+          <div class="hlabel">1W</div>
+          <div class="cell" style="background:#3d2230">71</div><div class="cell" style="background:#33202b">64</div>
+          <div class="cell" style="background:#222433">52</div><div class="cell" style="background:#1d2a2f">44</div>
+          <div class="cell" style="background:#1c2c2e">41</div>
+          <div class="hlabel">2W</div>
+          <div class="cell" style="background:#48243382">76</div><div class="cell" style="background:#3a2130">68</div>
+          <div class="cell" style="background:#252634">55</div><div class="cell" style="background:#1e2a30">46</div>
+          <div class="cell" style="background:#1d2b2f">43</div>
+          <div class="hlabel">1M</div>
+          <div class="cell" style="background:#542640">82</div><div class="cell" style="background:#45233a">74</div>
+          <div class="cell" style="background:#2a2737">59</div><div class="cell" style="background:#202a33">48</div>
+          <div class="cell" style="background:#1e2a31">45</div>
+          <div class="hlabel">2M</div>
+          <div class="cell" style="background:#6d2c4e">89</div><div class="cell" style="background:#572741">83</div>
+          <div class="cell" style="background:#302a3a">63</div><div class="cell" style="background:#232b35">51</div>
+          <div class="cell" style="background:#202a32">47</div>
+          <div class="hlabel">3M</div>
+          <div class="cell hi" style="background:#8a3560">97</div><div class="cell" style="background:#6d2c4e">90</div>
+          <div class="cell" style="background:#33293b">65</div><div class="cell" style="background:#242c36">53</div>
+          <div class="cell" style="background:#212b33">48</div>
+          <div class="hlabel">6M</div>
+          <div class="cell" style="background:#5e2945">85</div><div class="cell" style="background:#4b2440">78</div>
+          <div class="cell" style="background:#2c2838">61</div><div class="cell" style="background:#222b34">50</div>
+          <div class="cell" style="background:#1f2a32">46</div>
+          <div class="hlabel">9M</div>
+          <div class="cell" style="background:#46243a">75</div><div class="cell" style="background:#3b2233">70</div>
+          <div class="cell" style="background:#272736">58</div><div class="cell" style="background:#212b33">49</div>
+          <div class="cell" style="background:#1e2a31">45</div>
+          <div class="hlabel">1Y</div>
+          <div class="cell" style="background:#3a2132">69</div><div class="cell" style="background:#322030">66</div>
+          <div class="cell" style="background:#252634">56</div><div class="cell" style="background:#202a33">48</div>
+          <div class="cell" style="background:#1d2b2f">44</div>
+          <div class="hlabel">ON</div>
+          <div class="cell" style="background:#2a2737">59</div><div class="cell" style="background:#262635">56</div>
+          <div class="cell" style="background:#222533">53</div><div class="cell" style="background:#1f2931">47</div>
+          <div class="cell" style="background:#1e2a30">46</div>
+        </div>
+        <div class="legend"><span>cheap p0</span><div class="lbar"></div>
+          <span>rich p100</span><span style="margin-left:10px">cell = node %ile vs own 1y · L cycles lens</span></div>
+      </div>
+    </div>
+
+    <!-- row2 -->
+    <div id="row2">
+      <div class="p">
+        <div class="ph"><span class="mn">SMIL</span><span class="tt">Smile · 3M · %ile cone</span>
+          <span class="badge">Alt·3</span><span class="link lA">A</span><span class="age">12s</span></div>
+        <div class="pb">
+          <svg viewBox="0 0 470 168" width="100%" height="100%" preserveAspectRatio="none">
+            <path d="M52 30 C150 80,210 98,238 100 C300 98,372 84,420 72
+                     L420 96 C372 106,300 118,238 120 C210 118,150 104,52 66 Z"
+                  fill="#16202e" opacity=".8"/>
+            <g stroke="#1d2531"><line x1="36" y1="28" x2="460" y2="28"/>
+              <line x1="36" y1="80" x2="460" y2="80"/><line x1="36" y1="132" x2="460" y2="132"/></g>
+            <path d="M52 38 C150 86,210 102,238 104 C300 102,372 88,420 74"
+              fill="none" stroke="#74a6d4" stroke-width="1.8"/>
+            <path d="M52 44 C150 88,210 103,238 105 C300 103,372 90,420 78"
+              fill="none" stroke="#7FAE6E" stroke-width="1" stroke-dasharray="3 3"/>
+            <g fill="#74a6d4"><circle cx="52" cy="38" r="2.6"/><circle cx="140" cy="84" r="2.6"/>
+              <circle cx="238" cy="104" r="2.6"/><circle cx="332" cy="91" r="2.6"/>
+              <circle cx="420" cy="74" r="2.6"/></g>
+            <circle cx="52" cy="38" r="5" fill="none" stroke="#E8A33D" stroke-width="1.2"/>
+            <g font-family="monospace" font-size="9" fill="#8B95A6">
+              <text x="46" y="150">10P</text><text x="134" y="150">25P</text>
+              <text x="230" y="150">ATM</text><text x="326" y="150">25C</text>
+              <text x="414" y="150">10C</text>
+              <text x="62" y="32" fill="#E8A33D">10P @ p97 of cone</text>
+              <text x="330" y="120" fill="#4a586d">shade = p10–p90 (1y)</text>
+            </g>
+          </svg>
+          <span class="chartft">today ● · SABR – – · cone p10–p90 · RR25 −1.41 BF25 0.25</span>
+        </div>
+      </div>
+      <div class="p">
+        <div class="ph"><span class="mn">RCHP</span><span class="tt">Rich/cheap · EURJPY 3M</span>
+          <span class="badge">Alt·4</span><span class="link lA">A</span><span class="age">09:30</span></div>
+        <div class="pb"><div class="rch">
+          <div class="rrow"><span class="lab">CARRY iv−rv</span>
+            <div class="bar"><span class="mid"></span><i style="left:50%;width:18%;background:#7a4250"></i></div>
+            <span style="color:#e0a0ac">+1.2 p71</span></div>
+          <div class="rrow"><span class="lab">SKEW rr25</span>
+            <div class="bar"><span class="mid"></span><i style="left:50%;width:44%;background:#a23a4d"></i></div>
+            <span style="color:#e0a0ac">−1.41 p97</span></div>
+          <div class="rrow"><span class="lab">CONVEX bf25</span>
+            <div class="bar"><span class="mid"></span><i style="left:50%;width:9%;background:#5d4a55"></i></div>
+            <span class="mut">0.25 p58</span></div>
+          <div class="rrow"><span class="lab">TERM kink</span>
+            <div class="bar"><span class="mid"></span><i style="right:50%;width:12%;background:#2c5a4d"></i></div>
+            <span style="color:#86c7ab">−0.06 p38</span></div>
+        </div></div>
+      </div>
+    </div>
+
+    <!-- ASST -->
+    <div class="p" id="asst">
+      <div class="ph"><span class="mn">ASST</span><span class="tt">Analyst</span>
+        <span class="badge">Alt·5</span><span class="link none">–</span>
+        <span class="age">streaming</span></div>
+      <div class="ctxbar">
+        <span class="chip mode">mode:MORN</span><span class="chip">focus:SMIL EURJPY 3M</span>
+        <span class="chip">linkA:EURJPY/3M</span><span class="chip">posn:3 · vega −42k</span>
+        <span class="chip">alerts:2 WARN</span><span class="chip">packet:09:30</span>
+      </div>
+      <div class="thread">
+        <div class="msg"><div class="who">YOU · I on EURJPY card</div>
+          <p>Investigate — what invalidates the skew fade?</p></div>
+        <div class="msg an"><div class="who">ANALYST · investigate (6 tools)</div>
+          <p><b>Finding.</b> The fade rests on
+          <span class="prov">RR25 −1.41</span> at
+          <span class="prov">p97 (504d)</span> while
+          <span class="prov">spot-vol beta −0.24</span> is inside its p35–p65
+          band — the statistical quantity the skew prices hasn't moved.</p>
+          <p style="margin-top:5px"><b>Contradicting.</b>
+          <span class="prov">USD-leg corr regime 2.4σ</span> shift is live;
+          if it extends to EUR/JPY legs, the RR re-rating becomes justified.
+          <span class="judg">Judgment: that path historically shows up in
+          1W realized corr first — set the watch there.</span></p>
+          <p style="margin-top:5px"><b>Invalidates.</b> 1W realized EUR/JPY-leg
+          corr &gt; .45 · <span class="prov">BOJ 2026-06-16</span> entering the
+          3M bucket repricing the wing · RR persisting &gt; p97 for 5+ cycles.</p>
+          <p style="margin-top:5px"><b>Similar episodes.</b>
+          <span class="prov">backtest: skew_richcheap, |z|&gt;3, n=11</span> —
+          8 converged ≥ half within 5d; worst −0.83vp.</p>
+          <div class="toolt">tools: get_percentile ×2 · get_history ·
+          get_events · get_positions · run_backtest_slice</div></div>
+      </div>
+      <div class="composer"><div class="box">reply · ⇧⏎ new line · ✦ attach panel</div>
+        <span class="kbd">⏎</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="status">
+  <span class="live">● FEED LIVE</span><span>snap 12s</span><span>cycle 09:30 ✓</span>
+  <span class="warnt">▲ 2 WARN</span><span>analyst budget 14% used</span>
+  <span>ws 4ms</span><span class="sp"></span>
+  <span class="mono3">WATCH→mon2 · DESK→mon3 · F8 next window</span>
+</div>
+</div>
+
+<!-- command palette overlay (rendered open to demonstrate keyboard-first) -->
+<div class="palette">
+  <div class="pin"><b>›</b> smil eurj<span style="opacity:.35">|</span></div>
+  <div class="pres">
+    <div class="pitem sel"><span class="pm">SMIL</span>Smile · EURJPY 3M
+      <span class="pd">open in A-group · ⏎</span></div>
+    <div class="pitem"><span class="pm">SMIL</span>Smile · EURJPY 1M
+      <span class="pd">⌥⏎ new panel</span></div>
+    <div class="pitem"><span class="pm">OPPS</span>EURJPY skew dislocation · ACTIONABLE
+      <span class="pd">jump to card</span></div>
+    <div class="pitem"><span class="pm">ASST</span>"eurjpy skew" · thread 09:31
+      <span class="pd">resume</span></div>
+    <div class="pitem"><span class="pm">BLOT</span>EURJPY 3M RR · paper · 2026-05-28
+      <span class="pd">open entry</span></div>
+  </div>
+  <div class="pfoot"><span>⏎ open</span><span>⌥⏎ new panel</span>
+    <span>⇧⏎ all link group</span><span>tab cycle kind</span><span>esc close</span></div>
+</div>
+</body></html>
