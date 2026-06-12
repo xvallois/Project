@@ -6,7 +6,7 @@ briefs, and records — there is no execution automation anywhere.
 ## One-time setup (desk host)
     git clone <repo> && cd <repo>
     ./scripts/setup.sh
-    pip install blpapi --index-url=https://blpapi.bloomberg.com/repository/releases/python/simple/   # bbg only
+    .venv/bin/pip install blpapi --index-url=https://blpapi.bloomberg.com/repository/releases/python/simple/   # bbg only
 
 ## The morning command
     VW_PROVIDER=bbg VW_ANALYST=claude ANTHROPIC_API_KEY=sk-... \

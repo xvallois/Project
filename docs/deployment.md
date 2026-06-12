@@ -10,7 +10,7 @@
    desk: the sidecar only allows localhost:5173 dev origins by default
    and never falls back to `*`; browser calls from any other origin are
    refused until this is set (e.g. `https://desk-host:8443`).
-4. Run sidecar as a service: `uvicorn server.app:app --port 8787`
+4. Run sidecar as a service: `./.venv/bin/uvicorn server.app:app --port 8787`
    (single worker — the engine loop owns state; do NOT scale workers).
 5. Serve `frontend/dist` statically or run the Tauri shell (Phase 5);
    point it at the sidecar with `VITE_API`.

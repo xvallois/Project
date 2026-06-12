@@ -4,6 +4,7 @@ set -euo pipefail
 TAG="${1:?usage: release.sh vN-name [--review artifacts/release-reviews/<tag>.md]}"
 REVIEW="${3:-artifacts/release-reviews/${TAG}.md}"
 cd "$(dirname "$0")/.."
+[ -x .venv/bin/python ] && PATH="$PWD/.venv/bin:$PATH"
 echo "== gate 1/5: tests + contracts =="; ./scripts/test.sh
 echo "== gate 2/5: prompt compatibility =="; python3 scripts/verify_prompts.py
 echo "== gate 3/7: evaluation set (incl. counterexamples) =="; python3 scripts/run_eval.py
