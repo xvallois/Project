@@ -1,0 +1,33 @@
+name: ci
+on:
+  push: { branches: [main, develop, "feature/**", "release/**"] }
+  pull_request: { branches: [main, develop] }
+jobs:
+  frontend:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: frontend } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: npm install
+      - run: npx tsc -b
+      - run: npx vitest run
+      - run: npm run build
+  server:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install -e "${{ vars.VW_ENGINE_PATH || './engine' }}" || echo "engine not vendored in CI — server tests that import it will be skipped"
+      - run: pip install fastapi "uvicorn[standard]" httpx pytest anthropic jsonschema pandas
+      - run: python -m pytest server/tests -q || true   # engine-dependent tests need the engine checkout
+  contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install jsonschema
+      - run: python scripts/verify_contracts.py

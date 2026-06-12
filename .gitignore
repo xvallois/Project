@@ -1,0 +1,21 @@
+# node / frontend
+node_modules/
+dist/
+.vite/
+*.local
+# python / server
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+# runtime state (never in git)
+data/*
+!data/.gitkeep
+!data/README.md
+sidecar-data/
+*.db
+*.db-wal
+*.db-shm
+# os / editor
+.DS_Store
+*.log
