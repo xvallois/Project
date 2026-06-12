@@ -1,0 +1,24 @@
+universe:
+  # G10 USD majors (v1 decision: G10 only)
+  pairs: [EURUSD, GBPUSD, USDJPY, USDCHF, USDCAD, AUDUSD, NZDUSD]
+  # Crosses kept for triangle / implied-correlation signals
+  cross_pairs: [EURJPY, EURGBP]
+  tenors: ["ON", 1W, 2W, 1M, 2M, 3M, 6M, 9M, 1Y]
+
+schedule:
+  snap_interval_minutes: 5          # v1 decision: 5-minute snaps
+  eod_time_utc: "21:30"
+  market_open_days: [0, 1, 2, 3, 4]
+
+storage:
+  root: ./data
+  latest_dir: ./data/latest
+
+book:
+  enabled: false                    # planned: flip on when book adapter lands
+  source: csv
+  path: null
+
+ai:
+  model: claude-sonnet-4-20250514
+  max_ideas_per_cycle: 5

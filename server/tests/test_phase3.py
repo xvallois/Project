@@ -4,8 +4,8 @@ import os, sys
 from pathlib import Path
 import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-os.environ.setdefault("VW_CONFIG",
-                      "/home/claude/volwatch/config/settings.yaml")
+os.environ.setdefault("VW_CONFIG", str(
+    Path(__file__).resolve().parents[2] / "engine/config/settings.yaml"))
 from server.surfaces import driver, heat, node_vol, smile, term
 
 

@@ -20,9 +20,10 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
-      - run: pip install -e "${{ vars.VW_ENGINE_PATH || './engine' }}" || echo "engine not vendored in CI — server tests that import it will be skipped"
+      - run: pip install -e "${{ vars.VW_ENGINE_PATH || './engine' }}"
       - run: pip install fastapi "uvicorn[standard]" httpx pytest anthropic jsonschema pandas
-      - run: python -m pytest server/tests -q || true   # engine-dependent tests need the engine checkout
+      - run: cd engine && python -m pytest tests -q
+      - run: python -m pytest server/tests -q
   contracts:
     runs-on: ubuntu-latest
     steps:

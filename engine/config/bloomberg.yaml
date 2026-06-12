@@ -1,0 +1,28 @@
+session:
+  host: localhost
+  port: 8194
+
+# Ticker templates. {pair}=EURUSD, {tenor}=1M, {delta}=25|10
+tickers:
+  spot:        "{pair} Curncy"
+  forward:     "{pair}{tenor} BGN Curncy"
+  atm_vol:     "{pair}V{tenor} BGN Curncy"
+  rr:          "{pair}{delta}R{tenor} BGN Curncy"
+  bf:          "{pair}{delta}B{tenor} BGN Curncy"
+
+fields:
+  snap: [PX_LAST, PX_BID, PX_ASK, LAST_UPDATE_DT]
+  history_ohlc: [PX_OPEN, PX_HIGH, PX_LOW, PX_LAST]
+
+rates:
+  # OIS curve tickers per currency.
+  # !! EVERY ticker below must be verified on YOUR terminal before go-live
+  # !! (bring-up tool stage 4 checks them): python -m volwatch.tools.bbg_bringup
+  USD: {source: "SOFR OIS",  tickers: {1M: "USOSFR1Z Curncy", 3M: "USOSFRC Curncy", 6M: "USOSFRF Curncy", 1Y: "USOSFR1 Curncy"}}
+  EUR: {source: "ESTR OIS",  tickers: {1M: "EESWE1Z Curncy", 3M: "EESWEC Curncy", 6M: "EESWEF Curncy", 1Y: "EESWE1 Curncy"}}
+  GBP: {source: "SONIA OIS", tickers: {1M: "BPSWS1Z Curncy", 3M: "BPSWSC Curncy", 6M: "BPSWSF Curncy", 1Y: "BPSWS1 Curncy"}}
+  JPY: {source: "TONA OIS",  tickers: {1M: "JYSO1Z Curncy",  3M: "JYSOC Curncy",  6M: "JYSOF Curncy",  1Y: "JYSO1 Curncy"}}
+  CHF: {source: "SARON OIS", tickers: {1M: "SFSNT1Z Curncy", 3M: "SFSNTC Curncy", 6M: "SFSNTF Curncy", 1Y: "SFSNT1 Curncy"}}
+  CAD: {source: "CORRA OIS", tickers: {1M: "CDSO1Z Curncy",  3M: "CDSOC Curncy",  6M: "CDSOF Curncy",  1Y: "CDSO1 Curncy"}}
+  AUD: {source: "AONIA OIS", tickers: {1M: "ADSO1Z Curncy",  3M: "ADSOC Curncy",  6M: "ADSOF Curncy",  1Y: "ADSO1 Curncy"}}
+  NZD: {source: "NZ OIS",    tickers: {1M: "NDSO1Z Curncy",  3M: "NDSOC Curncy",  6M: "NDSOF Curncy",  1Y: "NDSO1 Curncy"}}

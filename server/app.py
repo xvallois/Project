@@ -200,7 +200,8 @@ def health_payload() -> dict:
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     cfg = Path(os.environ.get(
-        "VW_CONFIG", "/home/claude/volwatch/config/settings.yaml"))
+        "VW_CONFIG", str(Path(__file__).resolve().parents[1]
+                         / "engine" / "config" / "settings.yaml")))
     root = Path(os.environ.get("VW_DATA", "./sidecar-data")).resolve()
     # the engine resolves config/signals.yaml & config/events.csv from CWD
     os.chdir(cfg.parent.parent)
