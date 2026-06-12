@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "evidence-pack.schema.json",
+  "title": "EvidencePack v1",
+  "description": "The Analyst's entire world. Nothing outside this pack may become a number in a brief.",
+  "type": "object",
+  "required": [
+    "card_id",
+    "headline",
+    "pair",
+    "band",
+    "findings",
+    "invalidation",
+    "workspace_brief",
+    "evidence"
+  ],
+  "properties": {
+    "card_id": {
+      "type": "string"
+    },
+    "headline": {
+      "type": "string"
+    },
+    "pair": {
+      "type": "string"
+    },
+    "band": {
+      "type": "string"
+    },
+    "findings": {
+      "type": "string"
+    },
+    "invalidation": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "workspace_brief": {
+      "type": "string"
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "eid",
+          "label",
+          "value",
+          "provenance",
+          "tag"
+        ],
+        "properties": {
+          "eid": {
+            "type": "string",
+            "pattern": "^E[0-9]+$"
+          },
+          "label": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          },
+          "provenance": {
+            "type": "string"
+          },
+          "tag": {
+            "enum": [
+              "supporting",
+              "contradiction",
+              "context",
+              "ledger"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

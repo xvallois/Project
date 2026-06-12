@@ -78,9 +78,11 @@ class ProvenanceVerifier:
     """Resolves refs against a packet and a set of known store series."""
 
     def __init__(self, packet: dict,
-                 store_fields: set[tuple[str, str, str]]) -> None:
+                 store_fields: set[tuple[str, str, str]],
+                 ledger_keys: set[str] | None = None) -> None:
         self._packet = packet
         self._store_fields = store_fields   # {(pair, tenor, field)}
+        self._ledger_keys = ledger_keys
 
     def check_ref(self, ref: str) -> Violation | None:
         if ref.startswith("packet."):
@@ -114,6 +116,12 @@ class ProvenanceVerifier:
             return None
         if ref.startswith("prior:"):
             return None                    # declared placeholder, allowed
+        if ref.startswith("ledger:"):
+            # institutional memory: resolvable iff the db key exists
+            if self._ledger_keys is None:
+                return None                # no ledger context: tolerated
+            return (None if ref in self._ledger_keys
+                    else Violation(ref, "ledger key not present"))
         return Violation(ref, "unknown provenance scheme")
 
     def verify_card(self, card: dict) -> list[Violation]:

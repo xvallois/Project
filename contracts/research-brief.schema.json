@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "research-brief.schema.json",
+  "title": "ResearchBrief v1",
+  "type": "object",
+  "required": [
+    "card_id",
+    "depth",
+    "provider",
+    "model",
+    "units",
+    "status",
+    "sections",
+    "evidence",
+    "dropped",
+    "created_at"
+  ],
+  "properties": {
+    "card_id": {
+      "type": "string"
+    },
+    "depth": {
+      "enum": [
+        "triage",
+        "investigate",
+        "deep"
+      ]
+    },
+    "provider": {
+      "enum": [
+        "claude",
+        "stub"
+      ]
+    },
+    "model": {
+      "type": "string"
+    },
+    "units": {
+      "type": "integer"
+    },
+    "status": {
+      "enum": [
+        "ok",
+        "degraded",
+        "rejected"
+      ]
+    },
+    "sections": {
+      "type": "object",
+      "required": [
+        "finding",
+        "supporting",
+        "contradictory",
+        "why_now",
+        "invalidation",
+        "historical",
+        "next_investigation"
+      ],
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": [
+            "text",
+            "kind",
+            "cites"
+          ],
+          "properties": {
+            "text": {
+              "type": "string"
+            },
+            "kind": {
+              "enum": [
+                "analyst",
+                "deterministic"
+              ]
+            },
+            "cites": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "eid",
+          "label",
+          "value",
+          "provenance"
+        ]
+      }
+    },
+    "dropped": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "statements killed by the numeric gate"
+    },
+    "created_at": {
+      "type": "string"
+    }
+  }
+}

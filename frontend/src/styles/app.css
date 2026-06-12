@@ -163,3 +163,17 @@ tr:hover td{background:#141a24}
   --dv-paneview-active-outline-color:var(--amber);
   font-family:var(--sans);font-size:11px;
 }
+/* phase 2: trust separation — DETERMINISTIC vs ANALYST */
+.chip{font:600 8px var(--mono);letter-spacing:.06em;border-radius:3px;
+  padding:1px 5px;margin-right:6px;vertical-align:1px}
+.c-det{background:rgba(232,163,61,.16);color:var(--amber)}
+.c-ana{background:rgba(169,139,196,.18);color:var(--lD)}
+.c-stub{background:rgba(139,149,166,.18);color:var(--muted)}
+.ana{border-left:2px solid var(--lD);padding:3px 0 3px 8px;margin:3px 0;
+  font-size:11px;line-height:1.5}
+.det{border-left:2px solid var(--amber);padding:3px 0 3px 8px;margin:3px 0;
+  font-size:11px}
+.cites{display:block;margin-top:2px}
+.cite{font:10px var(--mono);color:var(--muted);margin-right:10px;
+  border-bottom:1px dotted #3a4d6b;cursor:help}
+.anote{font:italic 10px var(--sans);color:var(--lD);margin-top:2px}

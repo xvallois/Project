@@ -13,6 +13,7 @@ import { useUi, useWorkspaces, type OpenPanelRequest } from "../state/stores";
 import { BlotPanel } from "../panels/BlotPanel";
 import { HlthPanel } from "../panels/HlthPanel";
 import { KeysPanel } from "../panels/KeysPanel";
+import { AnalystPanel } from "../panels/AnalystPanel";
 import { OppsPanel } from "../panels/OppsPanel";
 import { OppsLivePanel } from "../panels/OppsLivePanel";
 import { useEngine } from "../state/engine";
@@ -37,14 +38,15 @@ export function usePanelContext(p: PanelParams): { pair: Pair; tenor: Tenor } {
 }
 
 const TITLES: Partial<Record<PanelKind, string>> = {
-  OPPS: "Opportunity feed", VHEAT: "Surface", SMIL: "Smile",
+  OPPS: "Opportunity feed", ASST: "Analyst", VHEAT: "Surface", SMIL: "Smile",
   RCHP: "Rich/cheap", SIGS: "Signal monitor", BLOT: "Decision ledger",
   HLTH: "Health", KEYS: "Keyboard map",
 };
 
 const BODIES: Partial<Record<PanelKind,
   React.FC<{ params: PanelParams }>>> = {
-  OPPS: OppsPanel, VHEAT: VheatPanel, SMIL: SmilePanel, RCHP: RchpPanel,
+  OPPS: OppsPanel, ASST: AnalystPanel, VHEAT: VheatPanel,
+  SMIL: SmilePanel, RCHP: RchpPanel,
   SIGS: SigsPanel, BLOT: BlotPanel, HLTH: HlthPanel, KEYS: KeysPanel,
 };
 

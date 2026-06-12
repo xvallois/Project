@@ -17,5 +17,5 @@ export const PANEL_KINDS = ["OPPS","VHEAT","SMIL","TERM","RCHP","RVSC",
 export type PanelKind = (typeof PANEL_KINDS)[number];
 
 /** Mnemonics implemented in Phase 0. Others parse but report "phase N". */
-export const PHASE0_PANELS: PanelKind[] = ["OPPS","VHEAT","SMIL","RCHP",
-  "SIGS","BLOT","HLTH","KEYS"];
+export const PHASE0_PANELS: PanelKind[] = ["OPPS","ASST","VHEAT","SMIL",
+  "RCHP","SIGS","BLOT","HLTH","KEYS"];

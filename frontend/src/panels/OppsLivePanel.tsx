@@ -24,7 +24,9 @@ const age = (iso: string) => {
 };
 
 export function OppsLivePanel({ params }: { params: PanelParams }) {
-  const { cards, transition, toBlotter } = useEngine();
+  const { cards, transition, toBlotter, investigate, investigating }
+    = useEngine();
+  const [sortAnalyst, setSortAnalyst] = useState(false);
   const [sel, setSel] = useState(0);
   const [dismissing, setDismissing] = useState<string | null>(null);
   const [note, setNote] = useState("");
@@ -34,8 +36,11 @@ export function OppsLivePanel({ params }: { params: PanelParams }) {
   const live = useMemo(() => cards
     .filter((c) => ["new", "seen", "watching", "acted"].includes(c.status))
     .filter((c) => !params.zMin || c.confidence.absZ >= params.zMin)
-    .sort((a, b) => (rank[b.band] - rank[a.band])
-      || b.confidence.absZ - a.confidence.absZ), [cards, params.zMin]);
+    .sort((a, b) => sortAnalyst
+      ? (a.analyst_rank ?? 99) - (b.analyst_rank ?? 99)
+      : (rank[b.band] - rank[a.band])
+        || b.confidence.absZ - a.confidence.absZ),
+    [cards, params.zMin, sortAnalyst]);
   const dead = useMemo(() => cards
     .filter((c) => c.status === "invalidated")
     .sort((a, b) => b.updated_at.localeCompare(a.updated_at))
@@ -52,6 +57,7 @@ export function OppsLivePanel({ params }: { params: PanelParams }) {
     else if (e.key.toLowerCase() === "w") transition(c.id, "watching");
     else if (e.key.toLowerCase() === "b") toBlotter(c);
     else if (e.key.toLowerCase() === "x") setDismissing(c.id);
+    else if (e.key.toLowerCase() === "i") investigate(c.id);
     else return;
     e.preventDefault();
   };
@@ -62,6 +68,10 @@ export function OppsLivePanel({ params }: { params: PanelParams }) {
         <span className="fchip act">LIVE ENGINE · {live.length}</span>
         <span className="fchip">invalidated {
           cards.filter((c) => c.status === "invalidated").length}</span>
+        <button className={`fchip ${sortAnalyst ? "act" : ""}`}
+          title="order by the Analyst's triage — bands stay the engine's"
+          onClick={() => setSortAnalyst((v) => !v)}>
+          SORT: {sortAnalyst ? "ANALYST" : "ENGINE"}</button>
         <span className="fchip" style={{ marginLeft: "auto", border: "none" }}>
           j/k · ⏎ · W · B · X</span>
       </div>
@@ -83,6 +93,9 @@ export function OppsLivePanel({ params }: { params: PanelParams }) {
                 c.tenors.slice(0, 3).join("/") || "—"}</span>
             </div>
             <div className="chead">{c.headline}</div>
+            {c.analyst_note && <div className="anote">
+              <span className="chip c-ana">ANALYST</span>
+              {c.analyst_note}</div>}
             <div className="cev">
               {c.evidence.slice(0, 3).map((it: ServerItem, j: number) =>
                 <span key={j}>{j > 0 && " · "}<Ref i={it} /></span>)}
@@ -114,8 +127,17 @@ export function OppsLivePanel({ params }: { params: PanelParams }) {
                     <span key={j} className="mut"><Ref i={it} /></span>)}
                 </div>
                 <div className="cact">
-                  <button className="btn pri" disabled
-                    title="Analyst deep-dive — Phase 2">Investigate I</button>
+                  <button className="btn pri"
+                    disabled={investigating !== null}
+                    title="Research brief from the Analyst · 3 units"
+                    onClick={() => investigate(c.id)}>
+                    {investigating === c.id ? "Investigating…"
+                      : "Investigate I · 3u"}</button>
+                  <button className="btn"
+                    disabled={investigating !== null}
+                    title="Deep dive · 10 units"
+                    onClick={() => investigate(c.id, "deep")}>Deep · 10u
+                  </button>
                   <button className="btn"
                     onClick={() => toBlotter(c)}>→ Blotter B</button>
                   <button className="btn" onClick={() =>

@@ -33,6 +33,12 @@ CREATE TABLE IF NOT EXISTS events (
   event_id TEXT PRIMARY KEY, ts TEXT NOT NULL, card_id TEXT,
   event TEXT NOT NULL, payload TEXT NOT NULL DEFAULT '{}');
 CREATE INDEX IF NOT EXISTS ix_events_card ON events(card_id);
+CREATE TABLE IF NOT EXISTS briefs (
+  brief_id TEXT PRIMARY KEY, card_id TEXT NOT NULL, depth TEXT NOT NULL,
+  status TEXT NOT NULL, created_at TEXT NOT NULL, payload TEXT NOT NULL);
+CREATE INDEX IF NOT EXISTS ix_briefs_card ON briefs(card_id);
+CREATE TABLE IF NOT EXISTS budget (
+  day TEXT PRIMARY KEY, used INTEGER NOT NULL, carryover INTEGER NOT NULL);
 CREATE TABLE IF NOT EXISTS blotter (
   id TEXT PRIMARY KEY, kind TEXT NOT NULL, status TEXT NOT NULL,
   pair TEXT NOT NULL, structure TEXT NOT NULL, direction TEXT NOT NULL,
@@ -165,6 +171,69 @@ class Db:
         self.record(status, card_id, dismissal or {})
         self._con.commit()
         return c
+
+    # ------------------------------------------------------------- briefs
+    def brief_add(self, brief: dict) -> None:
+        self._con.execute(
+            "INSERT INTO briefs VALUES (?,?,?,?,?,?)",
+            (str(uuid.uuid4()), brief["card_id"], brief["depth"],
+             brief["status"], brief["created_at"], json.dumps(brief)))
+        self._con.commit()
+
+    def briefs_for(self, card_id: str) -> list[dict]:
+        return [json.loads(r["payload"]) for r in self._con.execute(
+            "SELECT payload FROM briefs WHERE card_id=? "
+            "ORDER BY created_at DESC", (card_id,)).fetchall()]
+
+    def set_analyst_rank(self, card_id: str, rank: int, note: str) -> None:
+        cards = {c["id"]: c for c in self.all_cards()}
+        c = cards.get(card_id)
+        if c is None:
+            return
+        c["analyst_rank"], c["analyst_note"] = rank, note
+        self._put(c)
+        self._con.commit()
+
+    # ------------------------------------------------------------- budget
+    # Server-side mirror of the locked Phase-0 rules: 100u/day, 20%
+    # carryover cap, 12u triage reserve deep spends can't touch.
+    BASE_DAILY, CARRY_CAP, TRIAGE_RESERVE = 100, 20, 12
+    COST = {"triage": 1, "analysis": 3, "deep": 10}
+
+    def _budget_row(self) -> dict:
+        day = _now()[:10]
+        row = self._con.execute(
+            "SELECT * FROM budget WHERE day=?", (day,)).fetchone()
+        if row:
+            return dict(row)
+        prev = self._con.execute(
+            "SELECT * FROM budget ORDER BY day DESC LIMIT 1").fetchone()
+        carry = 0
+        if prev:
+            carry = min(self.BASE_DAILY + prev["carryover"] - prev["used"],
+                        self.CARRY_CAP)
+            carry = max(carry, 0)
+        self._con.execute("INSERT INTO budget VALUES (?,?,?)",
+                          (day, 0, carry))
+        self._con.commit()
+        return {"day": day, "used": 0, "carryover": carry}
+
+    def budget_state(self) -> dict:
+        r = self._budget_row()
+        total = self.BASE_DAILY + r["carryover"]
+        return {**r, "total": total, "remaining": total - r["used"],
+                "triage_reserve": self.TRIAGE_RESERVE}
+
+    def budget_spend(self, tier: str, units: int) -> dict:
+        st = self.budget_state()
+        if units > st["remaining"]:
+            return {"ok": False, "reason": "insufficient", "state": st}
+        if tier != "triage" and st["remaining"] - units < self.TRIAGE_RESERVE:
+            return {"ok": False, "reason": "reserve-protected", "state": st}
+        self._con.execute("UPDATE budget SET used=used+? WHERE day=?",
+                          (units, st["day"]))
+        self._con.commit()
+        return {"ok": True, "state": self.budget_state()}
 
     # ------------------------------------------------------------ blotter
     def blotter_add(self, e: dict) -> dict:

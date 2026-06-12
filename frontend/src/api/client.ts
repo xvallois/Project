@@ -18,6 +18,20 @@ export interface ServerCard {
   status: string; created_at: string; updated_at: string; detected_at: string;
   dismissal: { reason: string; note?: string; at: string } | null;
   invalidation: { at: string; outcome: string } | null;
+  analyst_rank?: number;            // alongside, never instead of band
+  analyst_note?: string;
+}
+
+export interface BriefStatement { text: string; kind: string;
+  cites: string[] }
+export interface BriefEvidence { eid: string; label: string; value: string;
+  provenance: string }
+export interface ResearchBrief {
+  card_id: string; depth: string; provider: string; model: string;
+  units: number; status: "ok" | "degraded" | "rejected";
+  sections: Record<string, BriefStatement[]>;
+  evidence: BriefEvidence[]; dropped: string[]; created_at: string;
+  refused?: string; error?: string;
 }
 export interface WsEnvelope { topic: string; type: "snapshot" | "delta";
   seq: number; ts: string; data: any }
@@ -65,4 +79,18 @@ export function connectWs(onMsg: (env: WsEnvelope) => void,
   };
   open();
   return () => { stop = true; ws?.close(); };
+}
+
+export async function postInvestigate(card_id: string,
+  depth: "investigate" | "deep", workspace_brief: string):
+  Promise<ResearchBrief> {
+  const r = await fetch(`${API}/api/investigate`, { method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ card_id, depth, workspace_brief }) });
+  return r.json();
+}
+export async function getBriefs(card_id: string): Promise<ResearchBrief[]> {
+  const r = await fetch(`${API}/api/briefs?card_id=${
+    encodeURIComponent(card_id)}`);
+  return (await r.json()).briefs;
 }

@@ -24,6 +24,10 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
+from server.analyst.context import ledger_memory
+from server.analyst.engine import investigate as run_investigation
+from server.analyst.engine import triage as run_triage
+from server.analyst.provider import AnthropicProvider, StubProvider
 from server.db import Db
 from server.detectors import detect
 from server.provenance import ProvenanceVerifier
@@ -82,6 +86,7 @@ hub = Hub()
 
 # ------------------------------------------------------------- the engine
 class EngineState:
+    analyst = None                # AnalystProvider
     settings = None
     store: ParquetStore | None = None
     pipeline: SnapPipeline | None = None
@@ -115,7 +120,11 @@ def run_cycle_sync() -> list[dict]:
             if c["status"] in ("new", "seen", "watching")}
     cards = [c.to_dict()
              for c in detect(S.packet, S.store, S.settings, live_ids=live)]
-    verifier = ProvenanceVerifier(S.packet, _store_fields(S.store))
+    ledger_keys = {f"ledger:card({c['id']})" for c in S.db.all_cards()}
+    ledger_keys |= {f"ledger:funnel({c['id'].split('|')[0]})"
+                    for c in S.db.all_cards()}
+    verifier = ProvenanceVerifier(S.packet, _store_fields(S.store),
+                                  ledger_keys)
     clean = []
     for c in cards:
         violations = verifier.verify_card(c)
@@ -127,7 +136,22 @@ def run_cycle_sync() -> list[dict]:
                       violations[0].reason)
             continue
         clean.append(c)
+    # deterministic institutional memory: real ledger episodes replace
+    # the placeholder similar-history on every card that has priors
+    for c in clean:
+        eps = ledger_memory(S.db, c)
+        if eps:
+            c["similar_history_items"] = [
+                {"label": f"prior {e['id']}",
+                 "value": f"{e['status']} → {e['outcome']}",
+                 "provenance": f"ledger:card({e['id']})"} for e in eps[:4]]
+            c["similar_history_note"] = "from the decision ledger"
     changed = S.db.apply_cycle(clean)
+    if S.analyst is not None:
+        try:
+            run_triage(S.db, S.packet, S.analyst)
+        except Exception:
+            log.exception("triage failed; feed unaffected")
     S.last_cycle = datetime.now(timezone.utc).isoformat()
     S.cycle_ms = (datetime.now() - t0).total_seconds() * 1000
     return changed
@@ -156,6 +180,8 @@ def health_payload() -> dict:
             "cycle_ms": round(S.cycle_ms, 1),
             "provider": os.environ.get("VW_PROVIDER", "mock"),
             "rejected_cards": S.rejected_cards,
+            "analyst": getattr(S.analyst, "name", None),
+            "budget": S.db.budget_state() if S.db else {},
             "engine_health": S.packet.get("health", {}),
             "telemetry": S.db.telemetry_summary() if S.db else {}}
 
@@ -199,6 +225,19 @@ async def lifespan(app: FastAPI):
                     S.settings.universe.all_pairs, S.settings.universe.tenors))
             log.info("seeded.")
     S.pipeline = SnapPipeline(S.settings, provider, store=S.store)
+
+    mode = os.environ.get("VW_ANALYST", "auto")
+    if mode == "claude" or (mode == "auto"
+                            and os.environ.get("ANTHROPIC_API_KEY")):
+        S.analyst = AnthropicProvider()
+        log.info("analyst: Claude (live)")
+    elif mode in ("stub", "auto"):
+        S.analyst = StubProvider()
+        log.info("analyst: stub (no ANTHROPIC_API_KEY — set VW_ANALYST="
+                 "claude + key on the desk)")
+    else:
+        S.analyst = None
+        log.info("analyst: disabled")
 
     await asyncio.to_thread(run_cycle_sync)          # first cycle before serve
     hub.snapshots["feed"] = {"cards": S.db.all_cards(), "changed": []}
@@ -268,6 +307,49 @@ def post_blotter_close(bid: str, body: BlotterClose):
 @app.get("/api/health")
 def get_health():
     return health_payload()
+
+
+class InvestigateIn(BaseModel):
+    card_id: str
+    depth: str = "investigate"           # investigate | deep
+    workspace_brief: str = ""
+
+
+@app.post("/api/investigate")
+async def post_investigate(body: InvestigateIn):
+    if S.analyst is None:
+        return {"error": "analyst disabled"}
+    if body.depth not in ("investigate", "deep"):
+        return {"error": "bad depth"}
+    brief = await asyncio.to_thread(
+        run_investigation, body.card_id, body.depth, body.workspace_brief,
+        S.db, S.packet, S.analyst)
+    await hub.publish("brief", brief)
+    return brief
+
+
+@app.get("/api/briefs")
+def get_briefs(card_id: str):
+    return {"briefs": S.db.briefs_for(card_id)}
+
+
+@app.post("/api/postmortem/{bid}")
+async def post_postmortem(bid: str):
+    """Draft a post-mortem for a closed blotter entry — same 7-section
+    structure, same gate; the ledger entry is the evidence."""
+    if S.analyst is None:
+        return {"error": "analyst disabled"}
+    row = next((r for r in S.db.blotter_all() if r["id"] == bid), None)
+    if row is None or not row.get("linked_opportunity_id"):
+        return {"error": "no linked opportunity for this entry"}
+    brief = await asyncio.to_thread(
+        run_investigation, row["linked_opportunity_id"], "investigate",
+        f"POST-MORTEM of a closed {row['kind']} position: outcome "
+        f"{row.get('pnl_volpts')}vp, notes: {row.get('notes') or '—'}. "
+        "Focus the note on what the entry thesis got right or wrong.",
+        S.db, S.packet, S.analyst)
+    await hub.publish("brief", brief)
+    return brief
 
 
 @app.get("/api/telemetry/summary")

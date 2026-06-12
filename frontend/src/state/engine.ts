@@ -1,19 +1,33 @@
 /** Live-engine store: server cards + health over WS, mock fallback. */
 import { create } from "zustand";
-import { connectWs, getFeed, getHealth, postBlotter, postTransition,
-  type ServerCard, type WsEnvelope } from "../api/client";
+import { connectWs, getFeed, getHealth, postBlotter, postInvestigate,
+  postTransition, type ResearchBrief, type ServerCard, type WsEnvelope }
+  from "../api/client";
+import { useWorkspaces } from "./stores";
 
 interface EngineStore {
   connected: boolean | null;        // null = connecting
   cards: ServerCard[];
   health: any;
+  brief: ResearchBrief | null;      // latest research brief
+  investigating: string | null;     // card id in flight
+  investigate: (id: string, depth?: "investigate" | "deep") => void;
   start: () => void;
   transition: (id: string, status: string, reason?: string,
     note?: string) => void;
   toBlotter: (c: ServerCard) => void;
 }
 export const useEngine = create<EngineStore>((set, get) => ({
-  connected: null, cards: [], health: {},
+  connected: null, cards: [], health: {}, brief: null, investigating: null,
+  investigate: (id, depth = "investigate") => {
+    const ws = useWorkspaces.getState();
+    const active = ws.all.find((w) => w.id === ws.activeId);
+    set({ investigating: id });
+    ws.dockApi?.openPanel({ kind: "ASST" });
+    postInvestigate(id, depth, active?.assistantBrief ?? "")
+      .then((brief) => set({ brief, investigating: null }))
+      .catch(() => set({ investigating: null }));
+  },
   start: () => {
     getFeed().then((cards) => set({ cards, connected: true }))
       .catch(() => set({ connected: false }));
@@ -21,6 +35,7 @@ export const useEngine = create<EngineStore>((set, get) => ({
     connectWs((env: WsEnvelope) => {
       if (env.topic === "feed") set({ cards: env.data.cards });
       if (env.topic === "health") set({ health: env.data });
+      if (env.topic === "brief") set({ brief: env.data });
     }, (up: boolean) => set({ connected: up }));
   },
   transition: (id, status, reason, note) => {

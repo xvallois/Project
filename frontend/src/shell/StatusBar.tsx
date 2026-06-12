@@ -22,6 +22,18 @@ export function StatusBar() {
           : <span className="mut">connecting…</span>}
       <span>snap {ageS}s</span>
       <span>{live} open opportunities</span>
+      {engine === true && eh.budget ? (
+        <span className="energy" title={
+          `Analyst budget (server): ${eh.budget.remaining}/${eh.budget.total
+          }u · triage 1u / investigate 3u / deep 10u · reserve ${
+          eh.budget.triage_reserve}u · analyst: ${eh.analyst}`}>
+          analyst
+          <span className="ebar"><i style={{ width:
+            `${Math.round(100 * eh.budget.remaining / eh.budget.total)}%`
+          }} /></span>
+          <span>{eh.budget.remaining}u</span>
+        </span>
+      ) : (
       <span className="energy" title={
         `Analyst budget: ${remaining(budget)}/${totalFor(budget)} units. ` +
         "Triage 1u · analysis 3u · deep 10u. Triage reserve 12u. " +
@@ -30,6 +42,7 @@ export function StatusBar() {
         <span className="ebar"><i style={{ width: `${budgetPct(budget)}%` }} /></span>
         <span>{remaining(budget)}u</span>
       </span>
+      )}
       <span className="sp" />
       <span>Ctrl+K command · Ctrl+1..5 modes · Ctrl+S save layout</span>
       <span className="mut">v0.1 phase-0 · mock data</span>

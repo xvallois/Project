@@ -1,5 +1,19 @@
 # Changelog
 
+## v2-analyst — 2026-06-11
+- Analyst layer: evidence-pack assembly (card + co-signals + engine health
+  + decision ledger), capped analysis loop, 7-section ResearchBrief.
+- Numeric citation gate: uncited numbers drop statements; missing sections
+  or gutted Finding rejects briefs; precision-aware quoting.
+- Server-side hard budget (SQLite): 1/3/10u tiers, 20% carryover cap,
+  12u triage reserve; typed refusals; zero-budget leaves engine untouched.
+- Institutional memory: ledger episodes + funnel stats feed both analyst
+  packs and deterministic similar-history (ledger: provenance scheme).
+- Trust separation in UI: ANALYST vs ENGINE chips, citation hovers,
+  provider badge (claude/stub), degraded/rejected states.
+- Prompts externalized to prompts/ as versioned contracts.
+- Tests: 34 server + 25 frontend.
+
 ## v1-deterministic-feed — 2026-06-11
 - FastAPI sidecar importing the engine in-process; snap/cycle loop.
 - Server detectors over real analytics; analyst-shaped cards.
