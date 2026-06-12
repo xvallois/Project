@@ -259,7 +259,12 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="volwatch sidecar", lifespan=lifespan)
-app.add_middleware(CORSMiddleware, allow_origins=["*"],
+# Local dev origins by default; the desk MUST set VW_CORS_ORIGINS to the
+# origin(s) serving the frontend (comma-separated). Never "*" in prod.
+CORS_ORIGINS = [o.strip() for o in os.environ.get(
+    "VW_CORS_ORIGINS",
+    "http://localhost:5173,http://127.0.0.1:5173").split(",") if o.strip()]
+app.add_middleware(CORSMiddleware, allow_origins=CORS_ORIGINS,
                    allow_methods=["*"], allow_headers=["*"])
 
 

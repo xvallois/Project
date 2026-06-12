@@ -52,6 +52,23 @@ export async function postBlotter(body: object): Promise<void> {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body) });
 }
+export interface ServerBlotterRow {
+  id: string; kind: string; status: string; pair: string; structure: string;
+  direction: string; linked_opportunity_id: string | null;
+  entry_thesis: string | null; size: string | null;
+  pnl_volpts: number | null; pnl_ccy: number | null; notes: string | null;
+  post_mortem: string | null; opened_at: string; closed_at: string | null;
+}
+export async function getBlotter(): Promise<ServerBlotterRow[]> {
+  const r = await fetch(`${API}/api/blotter`);
+  return (await r.json()).rows as ServerBlotterRow[];
+}
+export async function postBlotterClose(
+  id: string, pnlVolPts: number, notes: string): Promise<void> {
+  await fetch(`${API}/api/blotter/${encodeURIComponent(id)}/close`, {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ pnl_volpts: pnlVolPts, notes }) });
+}
 export async function getHealth(): Promise<Record<string, unknown>> {
   const r = await fetch(`${API}/api/health`);
   return r.json();
