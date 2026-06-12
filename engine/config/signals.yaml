@@ -1,0 +1,38 @@
+engine:
+  top_n: 20
+  min_history_days: 30
+
+signals:
+  vol_risk_premium:
+    enabled: true
+    lookback_days: 120
+    z_entry: 1.5
+    tenors: ["1M", "3M", "6M"]
+
+  term_structure_kink:
+    enabled: true
+    lookback_days: 120
+    z_entry: 1.5
+
+  skew_richcheap:
+    enabled: true
+    lookback_days: 120
+    z_entry: 1.5
+    tenors: ["1M", "3M"]
+
+  triangle_correlation:
+    enabled: true
+    lookback_days: 60
+    corr_gap_entry: 0.10
+    tenor: "3M"
+    triangles:
+      - {cross: EURJPY, leg1: EURUSD, leg2: USDJPY, relation: product}
+      - {cross: EURGBP, leg1: EURUSD, leg2: GBPUSD, relation: ratio}
+
+  event_vol:
+    enabled: true
+    calendar_path: "config/events.csv"
+    horizon_days: 7
+    ratio_hi: 1.5
+    ratio_lo: 0.6
+    min_history: 3

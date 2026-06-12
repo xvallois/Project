@@ -18,8 +18,8 @@ from pathlib import Path
 import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-os.environ.setdefault("VW_CONFIG",
-                      "/home/claude/volwatch/config/settings.yaml")
+os.environ.setdefault("VW_CONFIG", str(
+    Path(__file__).resolve().parents[2] / "engine/config/settings.yaml"))
 
 from server.analyst.context import build_pack, ledger_memory
 from server.analyst.engine import investigate, triage

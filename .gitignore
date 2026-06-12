@@ -22,3 +22,4 @@ sidecar-data/
 
 # build artifacts
 *.tsbuildinfo
+*.egg-info/

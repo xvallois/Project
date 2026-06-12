@@ -1,7 +1,8 @@
 # Deployment (desk)
 
-1. Checkout this repo + the volwatch engine repo side by side.
-2. `export VW_ENGINE_PATH=../volwatch && ./scripts/setup.sh`
+1. Checkout this repo — the engine is vendored at `engine/`.
+2. `./scripts/setup.sh` (set `VW_ENGINE_PATH` only to use an external
+   engine checkout instead of the vendored one)
 3. Configure env (see README table). Desk profile:
    `VW_PROVIDER=bbg VW_SNAP_S=300 VW_CYCLE_EVERY=6 VW_DATA=D:/vw-data`
    `ANTHROPIC_API_KEY=… VW_ANALYST=claude`
