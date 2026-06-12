@@ -1,0 +1,15 @@
+{
+ "acted": 1,
+ "analyst_abstain": 2,
+ "analyst_brief": 3,
+ "analyst_triage": 5,
+ "blotter_close": 1,
+ "blotter_open": 1,
+ "dismissed": 2,
+ "generated": 61,
+ "invalidated": 27,
+ "seen": 3,
+ "surface_open": 4,
+ "updated": 34,
+ "watching": 1
+}

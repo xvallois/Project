@@ -93,6 +93,51 @@ def brief_from_pack(pack: dict, depth: str,
         created_at=_now())
 
 
+def abstain_or_brief(pack: dict, depth: str,
+                     provider: AnalystProvider) -> dict:
+    """One provider round that may ABSTAIN — a first-class outcome.
+
+    A disciplined analyst with nothing incremental to say says so.
+    Abstention is an EVENT (telemetry analyst_abstain), never a brief:
+    the brief schema stays frozen. Units already spent stay spent (the
+    model ran); discipline is not free, it is cheap."""
+    raw = provider.complete(depth, SYSTEM_PROMPT, user_prompt(pack))
+    parsed = _parse(raw)
+    if isinstance(parsed, dict) and parsed.get("abstain") is True:
+        return {"abstained": True,
+                "reason": str(parsed.get("reason", ""))[:240]}
+    brief = _gate_parsed(parsed, pack, depth, provider)
+    if brief is None:                          # capped retry, then give up
+        brief = brief_from_pack(pack, depth, provider)
+    return {"brief": brief} if brief else {"error": "unparseable"}
+
+
+def _gate_parsed(parsed, pack, depth, provider):
+    if parsed is None:
+        return None
+    evidence = {e["eid"]: Evidence(e["eid"], e["label"], e["value"],
+                                   e["provenance"])
+                for e in pack["evidence"]}
+    sections = {k: [Statement(s.get("text", ""), "analyst",
+                              list(s.get("cites", [])))
+                    for s in v] for k, v in parsed.items()
+                if isinstance(v, list)}
+    clean, dropped, status = gate_brief(sections, evidence)
+    if status != "rejected":
+        det = [Statement(t, "deterministic", [])
+               for t in pack.get("invalidation", [])[:3]]
+        clean["invalidation"] = det + [
+            st for st in clean.get("invalidation", [])
+            if st.text not in {d.text for d in det}]
+    return ResearchBrief(
+        card_id=pack["card_id"], depth=depth, provider=provider.name,
+        model=MODEL_FOR[depth] if provider.name == "claude" else "stub",
+        units=UNITS[depth], status=status,
+        sections={k: v for k, v in clean.items()},
+        evidence=list(evidence.values()), dropped=dropped,
+        created_at=_now())
+
+
 def investigate(card_id: str, depth: str, workspace_brief: str,
                 db, packet: dict, provider: AnalystProvider) -> dict:
     cards = db.all_cards()
@@ -110,8 +155,16 @@ def investigate(card_id: str, depth: str, workspace_brief: str,
                 "card_id": card_id}
 
     pack = build_pack(card, cards, packet, db, workspace_brief)
-    brief = brief_from_pack(pack, depth, provider)
-    if brief is None:
+    # abstention check: redundancy context for the provider
+    pack["recent_briefs"] = len(db.briefs_for(card_id))
+    out = abstain_or_brief(pack, depth, provider)
+    if out.get("abstained"):
+        db.record("analyst_abstain", card_id,
+                  {"reason": out["reason"], "depth": depth,
+                   "units": UNITS[depth]})
+        return {**out, "card_id": card_id}
+    brief = out["brief"]
+    if brief is None or out.get("error"):
         db.record("analyst_rejected", card_id, {"reason": "unparseable"})
         return {"error": "analyst output unparseable after capped retries",
                 "card_id": card_id}

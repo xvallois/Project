@@ -60,6 +60,16 @@ class StubProvider(AnalystProvider):
                  "attention while the driver persists"} for m in order]})
         payload = json.loads(user.split("EVIDENCE_JSON:\n", 1)[1])
         ev = payload["evidence"]
+        sup_n = sum(1 for e in ev if e["tag"] == "supporting")
+        con_n = sum(1 for e in ev if e["tag"] == "contradiction")
+        if payload.get("recent_briefs", 0) >= 2:
+            return json.dumps({"abstain": True, "reason":
+                "Already briefed twice this episode; nothing incremental "
+                "in the pack since."})
+        if sup_n == 0 or con_n > sup_n:
+            return json.dumps({"abstain": True, "reason":
+                "Evidence too thin or net-contradictory for a useful "
+                "note; the deterministic card already says it all."})
         by_tag = lambda t: [e["eid"] for e in ev if e["tag"] == t]
         sup, con, led = by_tag("supporting"), by_tag("contradiction"), \
             by_tag("ledger")

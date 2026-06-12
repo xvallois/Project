@@ -75,6 +75,15 @@ class TestProvenance:
 
 # ----------------------------------------------------------------- bands
 class TestBanding:
+    def test_numpy_scalar_inputs_band_identically(self) -> None:
+        """Regression for the replay-found production bug: np.float64 z +
+        np.bool_ arithmetic (logical OR) saturated scores at 1."""
+        import numpy as np
+        for z in (1.6, 2.07, 2.78, 4.0):
+            assert band_for(np.float64(z), 1, True, True, False) == \
+                band_for(z, 1, True, True, False)
+        assert band_for(np.float64(2.07), 1, True, True, False) == "WATCH"
+
     def test_dq_flags_never_actionable(self) -> None:
         assert band_for(9.0, 9, dq_ok=False, models_agree=True,
                         prior_ok=True) == "SPECULATIVE"
@@ -112,6 +121,17 @@ class TestDbLifecycle:
         cards = db.all_cards()
         assert len(cards) == 1
         assert cards[0]["confidence"]["persistedCycles"] == 2
+
+    def test_persistence_feeds_banding(self, db: Db) -> None:
+        from server.detectors import band_for
+        fn = lambda c: band_for(c["absZ"], c["persistedCycles"],
+                                c["dataQualityOk"], c["modelsAgree"], False)
+        strong = _card()
+        strong["confidence"]["absZ"] = 2.6          # z2.6 + agree = WATCH@1
+        db.apply_cycle([strong], band_fn=fn)
+        assert db.all_cards()[0]["band"] == "WATCH"
+        db.apply_cycle([strong], band_fn=fn)        # persisted=2 → +1
+        assert db.all_cards()[0]["band"] == "ACTIONABLE"
 
     def test_dismiss_cooldown_and_escalation_override(self, db: Db) -> None:
         db.apply_cycle([_card()])

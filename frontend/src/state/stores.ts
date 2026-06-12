@@ -33,6 +33,8 @@ interface UiStore {
   linkGroups: Partial<Record<LinkGroupId, LinkContext>>;
   focusedPanel: string | null;            // dockview panel id
   paletteOpen: boolean;
+  selectedCard: string | null;
+  setSelectedCard: (id: string | null) => void;
   setLink: (g: LinkGroupId, ctx: Partial<LinkContext>) => void;
   setFocused: (id: string | null) => void;
   setPalette: (open: boolean) => void;
@@ -41,6 +43,8 @@ export const useUi = create<UiStore>((set) => ({
   linkGroups: { A: { pair: "EURJPY", tenor: "3M" } },
   focusedPanel: null,
   paletteOpen: false,
+  selectedCard: null,
+  setSelectedCard: (id) => set({ selectedCard: id }),
   setLink: (g, ctx) => set((s) => ({
     linkGroups: { ...s.linkGroups,
       [g]: { ...(s.linkGroups[g] ?? { pair: "EURUSD", tenor: "3M" }),

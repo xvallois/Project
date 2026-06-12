@@ -1,8 +1,10 @@
 /** OPPS over the LIVE engine — the product surface (Phase 1 §2).
  *  Expanded cards show the analyst-shaped sections; every number renders
  *  with its provenance ref on hover (the chain ends at the screen). */
-import { useMemo, useState } from "react";
-import type { ServerCard, ServerItem } from "../api/client";
+import { useEffect, useMemo, useState } from "react";
+import { getDriver, postSurfaceOpen, type DriverSeries, type ServerCard,
+  type ServerItem } from "../api/client";
+import { useUi } from "../state/stores";
 import { DISMISSAL_REASONS, type DismissalReason }
   from "../core/opportunities/types";
 import type { PanelParams } from "../shell/DockHost";
@@ -17,6 +19,32 @@ const Ref = ({ i }: { i: ServerItem }) => (
   </span>
 );
 
+function Driver({ id }: { id: string }) {
+  const [d, setD] = useState<DriverSeries | null>(null);
+  useEffect(() => { getDriver(id).then(setD).catch(() => null);
+    postSurfaceOpen("driver", undefined, undefined, id); }, [id]);
+  if (!d || !d.series.length) return null;
+  const vs = d.series.map((p) => p.value);
+  const lo = Math.min(...vs), hi = Math.max(...vs) || lo + 1;
+  const X = (i: number) => (i * 200) / Math.max(1, d.series.length - 1);
+  const Y = (v: number) => 26 - ((v - lo) / (hi - lo || 1)) * 24;
+  const det = d.detected_at.slice(0, 10);
+  const di = d.series.findIndex((p) => p.date >= det);
+  return (
+    <div style={{ marginTop: 4 }} title={d.provenance}>
+      <span className="ctype">DRIVER · {d.tenor} {d.field} </span>
+      <svg width="204" height="28" style={{ verticalAlign: "middle" }}>
+        <path fill="none" stroke="#74a6d4" strokeWidth="1"
+          d={d.series.map((p, i) =>
+            `${i ? "L" : "M"}${X(i)} ${Y(p.value)}`).join(" ")} />
+        {di >= 0 && <circle cx={X(di)} cy={Y(d.series[di].value)} r="2.5"
+          fill="var(--amber)" />}
+      </svg>
+      <span className="cev"> ● detection · {d.series.length}d</span>
+    </div>
+  );
+}
+
 const age = (iso: string) => {
   const s = Math.max(0, (Date.now() - Date.parse(iso)) / 1000);
   return s < 90 ? `${s | 0}s` : s < 5400 ? `${(s / 60) | 0}m`
@@ -30,6 +58,8 @@ export function OppsLivePanel({ params }: { params: PanelParams }) {
   const [sel, setSel] = useState(0);
   const [dismissing, setDismissing] = useState<string | null>(null);
   const [note, setNote] = useState("");
+  const selectedCard = useUi((s) => s.selectedCard);
+  const setSelectedCard = useUi((s) => s.setSelectedCard);
 
   const rank: Record<ServerCard["band"], number> =
     { ACTIONABLE: 2, WATCH: 1, SPECULATIVE: 0 };
@@ -41,6 +71,14 @@ export function OppsLivePanel({ params }: { params: PanelParams }) {
       : (rank[b.band] - rank[a.band])
         || b.confidence.absZ - a.confidence.absZ),
     [cards, params.zMin, sortAnalyst]);
+  // heatmap → card routing (decision surfaces select into the feed)
+  useEffect(() => {
+    if (!selectedCard) return;
+    const i = live.findIndex((c) => c.id === selectedCard);
+    if (i >= 0) setSel(i);
+    setSelectedCard(null);
+  }, [selectedCard, live, setSelectedCard]);
+
   const dead = useMemo(() => cards
     .filter((c) => c.status === "invalidated")
     .sort((a, b) => b.updated_at.localeCompare(a.updated_at))
@@ -121,6 +159,7 @@ export function OppsLivePanel({ params }: { params: PanelParams }) {
                   <span className="ctype">INVALIDATES · </span>
                   <span className="mut">{
                     c.invalidation_criteria.join(" · ")}</span></div>
+                <Driver id={c.id} />
                 <div style={{ marginTop: 3 }}>
                   <span className="ctype">SIMILAR · </span>
                   {c.similar_history_items.map((it: ServerItem, j: number) =>

@@ -73,10 +73,15 @@ def _now() -> str:
 
 def band_for(absz: float, persisted: int, dq_ok: bool, models_agree: bool,
              prior_ok: bool) -> str:
+    # COERCE: numpy scalars leak in from the percentile pipeline, and
+    # numpy's `+` on np.bool_ is logical OR — the evidence score would
+    # silently saturate at 1 and band everything SPECULATIVE. Found by
+    # decision-session replay (production-only; unit tests passed floats).
+    absz = float(absz)
     if not dq_ok:
         return "SPECULATIVE"            # flags can never be actionable
-    score = (absz >= 1.5) + (absz >= 2.5) + (persisted >= 2) \
-        + models_agree + prior_ok
+    score = int(absz >= 1.5) + int(absz >= 2.5) + int(persisted >= 2) \
+        + int(bool(models_agree)) + int(bool(prior_ok))
     return "ACTIONABLE" if score >= 4 else "WATCH" if score >= 2 \
         else "SPECULATIVE"
 

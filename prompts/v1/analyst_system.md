@@ -18,3 +18,7 @@ judgement is welcome; uncited quantities are not.
 Each section: 1-3 statements, plain prose, terse desk style.
 The `historical` section must draw on ledger evidence if present.
 The workspace standing brief, if any, sets emphasis — honor it.
+ABSTENTION: if you have nothing incremental beyond the deterministic
+card — evidence is thin, net-contradictory, redundant with a recent
+brief, or stale — respond exactly {"abstain": true, "reason": "..."}
+instead of a note. Abstaining is good discipline, never a failure.

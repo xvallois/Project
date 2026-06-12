@@ -1,0 +1,26 @@
+{
+  "pack": {
+    "card_id": "skew_richcheap|EURJPY|3M",
+    "headline": "3M RR again",
+    "pair": "EURJPY",
+    "band": "WATCH",
+    "findings": "f",
+    "invalidation": [
+      "metric reverts"
+    ],
+    "workspace_brief": "",
+    "evidence": [
+      {
+        "eid": "E1",
+        "label": "z-score",
+        "value": "+4.80",
+        "provenance": "packet.signals[0].score",
+        "tag": "supporting"
+      }
+    ],
+    "recent_briefs": 2
+  },
+  "expect": {
+    "abstain_required": true
+  }
+}

@@ -1,0 +1,14 @@
+{
+ "median_investigate_latency_s": 27.4,
+ "median_decision_latency_s": 27.4,
+ "median_close_latency_s": 0.0,
+ "generated": 61,
+ "seen": 3,
+ "ignored": 27,
+ "acted": 1,
+ "investigate_rate": 0.033,
+ "blotter_rate": 0.016,
+ "investigation_conversion": 0.5,
+ "analyst_abstain_rate": 0.4,
+ "surface_opens": 4
+}

@@ -57,6 +57,14 @@ export function AnalystPanel(_: { params: PanelParams }) {
       <span className="mut">Analyst: {health.analyst ?? "—"} ·
         budget {health.budget?.remaining ?? "—"}u remaining</span>
     </div>);
+  if (brief.abstained) return (
+    <div className="phase-note" style={{ padding: 16,
+      textAlign: "center" }}>
+      <span className="chip c-ana">ANALYST</span> abstained —
+      “{brief.reason}”<br /><br />
+      <span className="mut">Nothing incremental beyond the deterministic
+        card. Abstention is discipline, not failure; units spent are
+        recorded.</span></div>);
   if (brief.refused) return (
     <div className="phase-note">Budget refusal: {brief.refused}.
       Deterministic feed unaffected — the engine keeps running.</div>);

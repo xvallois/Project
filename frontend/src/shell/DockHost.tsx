@@ -14,6 +14,9 @@ import { BlotPanel } from "../panels/BlotPanel";
 import { HlthPanel } from "../panels/HlthPanel";
 import { KeysPanel } from "../panels/KeysPanel";
 import { AnalystPanel } from "../panels/AnalystPanel";
+import { SmileLivePanel } from "../panels/SmileLivePanel";
+import { TermPanel } from "../panels/TermPanel";
+import { VheatLivePanel } from "../panels/VheatLivePanel";
 import { OppsPanel } from "../panels/OppsPanel";
 import { OppsLivePanel } from "../panels/OppsLivePanel";
 import { useEngine } from "../state/engine";
@@ -38,7 +41,8 @@ export function usePanelContext(p: PanelParams): { pair: Pair; tenor: Tenor } {
 }
 
 const TITLES: Partial<Record<PanelKind, string>> = {
-  OPPS: "Opportunity feed", ASST: "Analyst", VHEAT: "Surface", SMIL: "Smile",
+  OPPS: "Opportunity feed", ASST: "Analyst", VHEAT: "Surface",
+  SMIL: "Smile", TERM: "Term structure",
   RCHP: "Rich/cheap", SIGS: "Signal monitor", BLOT: "Decision ledger",
   HLTH: "Health", KEYS: "Keyboard map",
 };
@@ -46,7 +50,7 @@ const TITLES: Partial<Record<PanelKind, string>> = {
 const BODIES: Partial<Record<PanelKind,
   React.FC<{ params: PanelParams }>>> = {
   OPPS: OppsPanel, ASST: AnalystPanel, VHEAT: VheatPanel,
-  SMIL: SmilePanel, RCHP: RchpPanel,
+  SMIL: SmilePanel, TERM: TermPanel, RCHP: RchpPanel,
   SIGS: SigsPanel, BLOT: BlotPanel, HLTH: HlthPanel, KEYS: KeysPanel,
 };
 
@@ -56,8 +60,9 @@ function PanelFrame(props: IDockviewPanelProps<PanelParams>) {
   const params = props.params;
   const setFocused = useUi((s) => s.setFocused);
   const liveEngine = useEngine((s) => s.connected) === true;
-  const Body = params.kind === "OPPS" && liveEngine
-    ? OppsLivePanel : BODIES[params.kind];
+  const LIVE: Partial<typeof BODIES> = { OPPS: OppsLivePanel,
+    VHEAT: VheatLivePanel, SMIL: SmileLivePanel };
+  const Body = (liveEngine && LIVE[params.kind]) || BODIES[params.kind];
 
   const cycleLink = () => {
     const i = LINK_ORDER.indexOf(params.link);

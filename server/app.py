@@ -29,8 +29,12 @@ from server.analyst.engine import investigate as run_investigation
 from server.analyst.engine import triage as run_triage
 from server.analyst.provider import AnthropicProvider, StubProvider
 from server.db import Db
-from server.detectors import detect
+from server.detectors import band_for, detect
 from server.provenance import ProvenanceVerifier
+from server.surfaces import driver as surf_driver
+from server.surfaces import heat as surf_heat
+from server.surfaces import smile as surf_smile
+from server.surfaces import term as surf_term
 
 from volwatch.ai.context import assemble_packet
 from volwatch.config import load_settings
@@ -146,7 +150,13 @@ def run_cycle_sync() -> list[dict]:
                  "value": f"{e['status']} → {e['outcome']}",
                  "provenance": f"ledger:card({e['id']})"} for e in eps[:4]]
             c["similar_history_note"] = "from the decision ledger"
-    changed = S.db.apply_cycle(clean)
+    def _band(conf: dict) -> str:
+        prior = conf.get("backtestPrior")
+        return band_for(conf["absZ"], conf["persistedCycles"],
+                        conf["dataQualityOk"], conf["modelsAgree"],
+                        bool(prior and prior.get("hitRate", 0) >= 0.55
+                             and prior.get("n", 0) >= 20))
+    changed = S.db.apply_cycle(clean, band_fn=_band)
     if S.analyst is not None:
         try:
             run_triage(S.db, S.packet, S.analyst)
@@ -352,6 +362,25 @@ async def post_postmortem(bid: str):
     return brief
 
 
+class TelemetryEvent(BaseModel):
+    event: str                       # e.g. surface_open
+    card_id: str | None = None
+    payload: dict = {}
+
+
+@app.post("/api/telemetry/event")
+def post_event(e: TelemetryEvent):
+    if not e.event.startswith(("surface_", "session_")):
+        return {"ok": False, "reason": "client may only emit surface_/session_ events"}
+    S.db.record(e.event, e.card_id, e.payload)
+    return {"ok": True}
+
+
+@app.get("/api/metrics/decisions")
+def get_decision_metrics():
+    return S.db.decision_metrics()
+
+
 @app.get("/api/telemetry/summary")
 def get_telemetry():
     return S.db.telemetry_summary()
@@ -360,6 +389,34 @@ def get_telemetry():
 @app.get("/api/packet")
 def get_packet():
     return S.packet
+
+
+@app.get("/api/heat/{pair}")
+def get_heat(pair: str):
+    return surf_heat(S.store, pair)
+
+
+@app.get("/api/smile/{pair}/{tenor}")
+def get_smile(pair: str, tenor: str):
+    return surf_smile(S.store, pair, tenor)
+
+
+@app.get("/api/term/{pair}")
+def get_term(pair: str):
+    return surf_term(S.store, pair)
+
+
+class DriverIn(BaseModel):
+    card_id: str                          # body: ids contain '/'
+
+
+@app.post("/api/driver")
+def post_driver(body: DriverIn):
+    card = next((c for c in S.db.all_cards() if c["id"] == body.card_id),
+                None)
+    if card is None:
+        return {"error": "unknown card"}
+    return surf_driver(S.store, card)
 
 
 @app.get("/api/surface/{pair}")
