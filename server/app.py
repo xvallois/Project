@@ -31,6 +31,10 @@ from server.analyst.provider import AnthropicProvider, StubProvider
 from server.db import Db
 from server.detectors import detect
 from server.provenance import ProvenanceVerifier
+from server.surfaces import driver as surf_driver
+from server.surfaces import heat as surf_heat
+from server.surfaces import smile as surf_smile
+from server.surfaces import term as surf_term
 
 from volwatch.ai.context import assemble_packet
 from volwatch.config import load_settings
@@ -360,6 +364,34 @@ def get_telemetry():
 @app.get("/api/packet")
 def get_packet():
     return S.packet
+
+
+@app.get("/api/heat/{pair}")
+def get_heat(pair: str):
+    return surf_heat(S.store, pair)
+
+
+@app.get("/api/smile/{pair}/{tenor}")
+def get_smile(pair: str, tenor: str):
+    return surf_smile(S.store, pair, tenor)
+
+
+@app.get("/api/term/{pair}")
+def get_term(pair: str):
+    return surf_term(S.store, pair)
+
+
+class DriverIn(BaseModel):
+    card_id: str                          # body: ids contain '/'
+
+
+@app.post("/api/driver")
+def post_driver(body: DriverIn):
+    card = next((c for c in S.db.all_cards() if c["id"] == body.card_id),
+                None)
+    if card is None:
+        return {"error": "unknown card"}
+    return surf_driver(S.store, card)
 
 
 @app.get("/api/surface/{pair}")
