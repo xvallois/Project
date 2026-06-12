@@ -1,4 +1,5 @@
 import { budgetPct, useBudget, useFeed, useMarket } from "../state/stores";
+import { useEngine } from "../state/engine";
 import { remaining, totalFor } from "../core/budget/engine";
 
 export function StatusBar() {
@@ -9,9 +10,16 @@ export function StatusBar() {
     ["new", "seen", "watching"].includes(c.status)).length;
   const ageS = Math.max(0,
     Math.round((Date.now() - Date.parse(asof)) / 1000));
+  const engine = useEngine((s) => s.connected);
+  const eh = useEngine((s) => s.health);
   return (
     <div className="status">
-      <span className="live">● FEED LIVE</span>
+      {engine === true
+        ? <span className="live">● ENGINE LIVE · cycle {eh.cycle_ms ?? "—"}ms
+            · rejected {eh.rejected_cards ?? 0}</span>
+        : engine === false
+          ? <span className="warnt">▲ ENGINE OFFLINE · mock fallback</span>
+          : <span className="mut">connecting…</span>}
       <span>snap {ageS}s</span>
       <span>{live} open opportunities</span>
       <span className="energy" title={

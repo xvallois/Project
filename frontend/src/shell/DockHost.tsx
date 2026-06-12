@@ -14,6 +14,8 @@ import { BlotPanel } from "../panels/BlotPanel";
 import { HlthPanel } from "../panels/HlthPanel";
 import { KeysPanel } from "../panels/KeysPanel";
 import { OppsPanel } from "../panels/OppsPanel";
+import { OppsLivePanel } from "../panels/OppsLivePanel";
+import { useEngine } from "../state/engine";
 import { RchpPanel } from "../panels/RchpPanel";
 import { SigsPanel } from "../panels/SigsPanel";
 import { SmilePanel } from "../panels/SmilePanel";
@@ -51,7 +53,9 @@ const LINK_ORDER: (LinkGroupId | null)[] = [null, "A", "B", "C", "D"];
 function PanelFrame(props: IDockviewPanelProps<PanelParams>) {
   const params = props.params;
   const setFocused = useUi((s) => s.setFocused);
-  const Body = BODIES[params.kind];
+  const liveEngine = useEngine((s) => s.connected) === true;
+  const Body = params.kind === "OPPS" && liveEngine
+    ? OppsLivePanel : BODIES[params.kind];
 
   const cycleLink = () => {
     const i = LINK_ORDER.indexOf(params.link);

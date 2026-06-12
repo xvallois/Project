@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "blotter.schema.json",
+  "title": "BlotterEntry v1 (unified ledger)",
+  "type": "object",
+  "required": [
+    "id",
+    "kind",
+    "status",
+    "pair",
+    "structure",
+    "direction",
+    "opened_at"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "kind": {
+      "enum": [
+        "paper",
+        "live",
+        "idea",
+        "invalidated"
+      ]
+    },
+    "status": {
+      "enum": [
+        "open",
+        "closed",
+        "stopped",
+        "expired"
+      ]
+    },
+    "pair": {
+      "type": "string"
+    },
+    "structure": {
+      "type": "string"
+    },
+    "direction": {
+      "type": "string"
+    },
+    "linked_opportunity_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "closes the provenance chain feed\u2192decision"
+    },
+    "entry_thesis": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "card evidence frozen at entry, refs included"
+    },
+    "pnl_volpts": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "notes": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "opened_at": {
+      "type": "string"
+    },
+    "closed_at": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}

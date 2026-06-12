@@ -1,0 +1,177 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "opportunity-card.schema.json",
+  "title": "OpportunityCard v2",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "pair",
+    "tenors",
+    "headline",
+    "structure",
+    "band",
+    "confidence",
+    "findings",
+    "evidence",
+    "supporting",
+    "contradictions",
+    "invalidation_criteria",
+    "similar_history_items",
+    "similar_history_note",
+    "status",
+    "created_at",
+    "updated_at",
+    "detected_at"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "dedup key type|pair|structure"
+    },
+    "type": {
+      "type": "string"
+    },
+    "pair": {
+      "type": "string"
+    },
+    "tenors": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "headline": {
+      "type": "string"
+    },
+    "structure": {
+      "type": "string"
+    },
+    "band": {
+      "enum": [
+        "SPECULATIVE",
+        "WATCH",
+        "ACTIONABLE"
+      ]
+    },
+    "confidence": {
+      "type": "object",
+      "required": [
+        "absZ",
+        "persistedCycles",
+        "dataQualityOk",
+        "modelsAgree"
+      ],
+      "properties": {
+        "absZ": {
+          "type": "number"
+        },
+        "persistedCycles": {
+          "type": "integer"
+        },
+        "dataQualityOk": {
+          "type": "boolean"
+        },
+        "modelsAgree": {
+          "type": "boolean"
+        },
+        "backtestPrior": {
+          "type": [
+            "object",
+            "null"
+          ]
+        }
+      }
+    },
+    "findings": {
+      "type": "string"
+    },
+    "evidence": {
+      "$ref": "#/$defs/items"
+    },
+    "supporting": {
+      "$ref": "#/$defs/items"
+    },
+    "contradictions": {
+      "$ref": "#/$defs/items"
+    },
+    "invalidation_criteria": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "description": "every card must state what kills it"
+    },
+    "similar_history_items": {
+      "$ref": "#/$defs/items"
+    },
+    "similar_history_note": {
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "new",
+        "seen",
+        "watching",
+        "acted",
+        "dismissed",
+        "invalidated",
+        "expired"
+      ]
+    },
+    "created_at": {
+      "type": "string"
+    },
+    "updated_at": {
+      "type": "string"
+    },
+    "detected_at": {
+      "type": "string"
+    },
+    "dismissal": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "invalidation": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "analyst_rank": {
+      "type": "integer",
+      "description": "triage order \u2014 NEVER overrides band"
+    },
+    "analyst_note": {
+      "type": "string"
+    }
+  },
+  "$defs": {
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "label",
+          "value",
+          "provenance"
+        ],
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          },
+          "provenance": {
+            "type": "string",
+            "pattern": "^(packet\\.|store://|derived:|prior:|ledger:)"
+          }
+        }
+      }
+    }
+  }
+}

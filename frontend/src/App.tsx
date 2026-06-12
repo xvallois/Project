@@ -6,9 +6,11 @@ import { StatusBar } from "./shell/StatusBar";
 import { TopBar } from "./shell/TopBar";
 import { useGlobalKeys } from "./shell/useKeyboard";
 import { useFeed, useMarket } from "./state/stores";
+import { useEngine } from "./state/engine";
 
 export default function App() {
   useGlobalKeys();
+  useEffect(() => { useEngine.getState().start(); }, []);
   // mock realtime: a "snap" every 20s ages freshness and re-runs Tier-1.
   useEffect(() => {
     const t = setInterval(() => {
