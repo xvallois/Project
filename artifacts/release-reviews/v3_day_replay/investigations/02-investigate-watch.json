@@ -1,0 +1,158 @@
+{
+ "card_id": "triangle_correlation|EURJPY|3M triangle vs EURUSD/USDJPY (buy cross vol / sell leg vols)",
+ "depth": "investigate",
+ "provider": "stub",
+ "model": "stub",
+ "units": 3,
+ "status": "ok",
+ "sections": {
+  "finding": [
+   {
+    "text": "EURJPY actionable-band dislocation \u2014 evidence-led read below.",
+    "kind": "analyst",
+    "cites": [
+     "E1",
+     "E2"
+    ]
+   }
+  ],
+  "supporting": [
+   {
+    "text": "z-score stands at -3.80.",
+    "kind": "analyst",
+    "cites": [
+     "E1"
+    ]
+   },
+   {
+    "text": "edge estimate stands at +3.03vp.",
+    "kind": "analyst",
+    "cites": [
+     "E2"
+    ]
+   },
+   {
+    "text": "co-signal SURFACE_CHEAP stands at atm cheap across 6 tenors (lead 1W p1).",
+    "kind": "analyst",
+    "cites": [
+     "E4"
+    ]
+   }
+  ],
+  "contradictory": [
+   {
+    "text": "No deterministic contradiction registered this cycle.",
+    "kind": "analyst",
+    "cites": []
+   }
+  ],
+  "why_now": [
+   {
+    "text": "The trigger is fresh this cycle and the structure has not yet mean-reverted.",
+    "kind": "analyst",
+    "cites": [
+     "E1",
+     "E2"
+    ]
+   }
+  ],
+  "invalidation": [
+   {
+    "text": "implied-realized corr gap < 0.15",
+    "kind": "deterministic",
+    "cites": []
+   },
+   {
+    "text": "leg correlation regime shift",
+    "kind": "deterministic",
+    "cites": []
+   },
+   {
+    "text": "Watch for the driving metric mean-reverting or the regime breaking.",
+    "kind": "analyst",
+    "cites": []
+   }
+  ],
+  "historical": [
+   {
+    "text": "Ledger: prior episode triangle_correlation|EURGBP|3M triangle vs EURUSD/GBPUSD (sell cross vol / buy leg vols) \u2014 acted \u2192 acted.",
+    "kind": "analyst",
+    "cites": [
+     "E8"
+    ]
+   },
+   {
+    "text": "Ledger: triangle_correlation funnel to date \u2014 2 generated / 1 acted / 0 dismissed / 0 invalidated.",
+    "kind": "analyst",
+    "cites": [
+     "E9"
+    ]
+   }
+  ],
+  "next_investigation": [
+   {
+    "text": "Open the smile panel at the driving tenor and compare realized beta before sizing.",
+    "kind": "analyst",
+    "cites": []
+   }
+  ]
+ },
+ "evidence": [
+  {
+   "eid": "E1",
+   "label": "z-score",
+   "value": "-3.80",
+   "provenance": "packet.signals[1].score"
+  },
+  {
+   "eid": "E2",
+   "label": "edge estimate",
+   "value": "+3.03vp",
+   "provenance": "packet.signals[1].edge_estimate_volpts"
+  },
+  {
+   "eid": "E3",
+   "label": "same family elsewhere (EURGBP)",
+   "value": "3M triangle vs EURUSD/GBPUSD (sell cross vol / buy leg vols): sell_corr z +7.1",
+   "provenance": "derived:card(triangle_correlation|EURGBP|3M triangle vs EURUSD/GBPUSD (sell cross vol / buy leg vols))"
+  },
+  {
+   "eid": "E4",
+   "label": "co-signal SURFACE_CHEAP",
+   "value": "atm cheap across 6 tenors (lead 1W p1)",
+   "provenance": "derived:card(ATM_PCTILE|EURJPY|*)"
+  },
+  {
+   "eid": "E5",
+   "label": "co-signal SKEW_PCTILE",
+   "value": "2M rr25 at p1 of stored history",
+   "provenance": "derived:card(SKEW_PCTILE|EURJPY|2M)"
+  },
+  {
+   "eid": "E6",
+   "label": "co-signal vol_risk_premium",
+   "value": "6M ATM (delta-hedged): buy_vol z -2.6",
+   "provenance": "derived:card(vol_risk_premium|EURJPY|6M ATM (delta-hedged))"
+  },
+  {
+   "eid": "E7",
+   "label": "SABR/SSVI worst divergence",
+   "value": "3.31vp",
+   "provenance": "packet.health.EURJPY.model_divergence_worst.volpts"
+  },
+  {
+   "eid": "E8",
+   "label": "prior episode triangle_correlation|EURGBP|3M triangle vs EURUSD/GBPUSD (sell cross vol / buy leg vols)",
+   "value": "acted \u2192 acted",
+   "provenance": "ledger:card(triangle_correlation|EURGBP|3M triangle vs EURUSD/GBPUSD (sell cross vol / buy leg vols))"
+  },
+  {
+   "eid": "E9",
+   "label": "triangle_correlation funnel to date",
+   "value": "2 generated / 1 acted / 0 dismissed / 0 invalidated",
+   "provenance": "ledger:funnel(triangle_correlation)"
+  }
+ ],
+ "dropped": [],
+ "created_at": "2026-06-12T07:40:47.220364+00:00"
+}

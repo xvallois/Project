@@ -116,7 +116,16 @@ def build_pack(card: dict, all_cards: list[dict], packet: dict,
 
 from pathlib import Path as _P
 
-_PROMPT_FILE = _P(__file__).resolve().parents[2] / "prompts" / "analyst_system.md"
+def _prompt_dir() -> _P:
+    root = _P(__file__).resolve().parents[2] / "prompts"
+    cur = root / "current"
+    if cur.exists():
+        return cur
+    versions = sorted(root.glob("v[0-9]*"))      # symlink-free fallback
+    return versions[-1]
+
+
+_PROMPT_FILE = _prompt_dir() / "analyst_system.md"
 SYSTEM_PROMPT = "\n".join(
     l for l in _PROMPT_FILE.read_text().splitlines()
     if not l.startswith("<!--") and not l.endswith("-->"))

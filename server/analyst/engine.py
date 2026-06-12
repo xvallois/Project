@@ -24,10 +24,10 @@ log = logging.getLogger("analyst")
 UNITS = {"triage": 1, "investigate": 3, "deep": 10}
 
 from pathlib import Path as _P
+from server.analyst.context import _prompt_dir
 _TRIAGE_PROMPT = "\n".join(
-    l for l in (_P(__file__).resolve().parents[2] / "prompts"
-                / "analyst_triage.md").read_text().splitlines()
-    if not l.startswith("<!--"))
+    l for l in (_prompt_dir() / "analyst_triage.md")
+    .read_text().splitlines() if not l.startswith("<!--"))
 MAX_LOOP = 2                       # capped analysis loop
 
 
@@ -52,6 +52,92 @@ def _parse(raw: str) -> dict | None:
     return None
 
 
+def brief_from_pack(pack: dict, depth: str,
+                    provider: AnalystProvider) -> ResearchBrief | None:
+    """Pack -> gated brief. Shared by live investigations and the
+    evaluation harness (frozen packs). Returns None if unparseable
+    after the capped loop."""
+    evidence = {e["eid"]: Evidence(e["eid"], e["label"], e["value"],
+                                   e["provenance"])
+                for e in pack["evidence"]}
+    sections_raw = None
+    for attempt in range(MAX_LOOP):
+        raw = provider.complete(depth, SYSTEM_PROMPT, user_prompt(pack))
+        sections_raw = _parse(raw)
+        if sections_raw is not None:
+            break
+        log.warning("analyst returned unparseable output (attempt %d)",
+                    attempt + 1)
+    if sections_raw is None:
+        return None
+    sections = {k: [Statement(s.get("text", ""), "analyst",
+                              list(s.get("cites", [])))
+                    for s in v] for k, v in sections_raw.items()
+                if isinstance(v, list)}
+    clean, dropped, status = gate_brief(sections, evidence)
+    # The engine's own invalidation criteria ALWAYS reach the brief as
+    # deterministic statements (they are engine text, outside the analyst
+    # gate); the model may add color but can never displace them.
+    if status != "rejected":
+        det = [Statement(t, "deterministic", [])
+               for t in pack.get("invalidation", [])[:3]]
+        clean["invalidation"] = det + [
+            st for st in clean.get("invalidation", [])
+            if st.text not in {d.text for d in det}]
+    return ResearchBrief(
+        card_id=pack["card_id"], depth=depth, provider=provider.name,
+        model=MODEL_FOR[depth] if provider.name == "claude" else "stub",
+        units=UNITS[depth], status=status,
+        sections={k: v for k, v in clean.items()},
+        evidence=list(evidence.values()), dropped=dropped,
+        created_at=_now())
+
+
+def abstain_or_brief(pack: dict, depth: str,
+                     provider: AnalystProvider) -> dict:
+    """One provider round that may ABSTAIN — a first-class outcome.
+
+    A disciplined analyst with nothing incremental to say says so.
+    Abstention is an EVENT (telemetry analyst_abstain), never a brief:
+    the brief schema stays frozen. Units already spent stay spent (the
+    model ran); discipline is not free, it is cheap."""
+    raw = provider.complete(depth, SYSTEM_PROMPT, user_prompt(pack))
+    parsed = _parse(raw)
+    if isinstance(parsed, dict) and parsed.get("abstain") is True:
+        return {"abstained": True,
+                "reason": str(parsed.get("reason", ""))[:240]}
+    brief = _gate_parsed(parsed, pack, depth, provider)
+    if brief is None:                          # capped retry, then give up
+        brief = brief_from_pack(pack, depth, provider)
+    return {"brief": brief} if brief else {"error": "unparseable"}
+
+
+def _gate_parsed(parsed, pack, depth, provider):
+    if parsed is None:
+        return None
+    evidence = {e["eid"]: Evidence(e["eid"], e["label"], e["value"],
+                                   e["provenance"])
+                for e in pack["evidence"]}
+    sections = {k: [Statement(s.get("text", ""), "analyst",
+                              list(s.get("cites", [])))
+                    for s in v] for k, v in parsed.items()
+                if isinstance(v, list)}
+    clean, dropped, status = gate_brief(sections, evidence)
+    if status != "rejected":
+        det = [Statement(t, "deterministic", [])
+               for t in pack.get("invalidation", [])[:3]]
+        clean["invalidation"] = det + [
+            st for st in clean.get("invalidation", [])
+            if st.text not in {d.text for d in det}]
+    return ResearchBrief(
+        card_id=pack["card_id"], depth=depth, provider=provider.name,
+        model=MODEL_FOR[depth] if provider.name == "claude" else "stub",
+        units=UNITS[depth], status=status,
+        sections={k: v for k, v in clean.items()},
+        evidence=list(evidence.values()), dropped=dropped,
+        created_at=_now())
+
+
 def investigate(card_id: str, depth: str, workspace_brief: str,
                 db, packet: dict, provider: AnalystProvider) -> dict:
     cards = db.all_cards()
@@ -69,42 +155,27 @@ def investigate(card_id: str, depth: str, workspace_brief: str,
                 "card_id": card_id}
 
     pack = build_pack(card, cards, packet, db, workspace_brief)
-    evidence = {e["eid"]: Evidence(e["eid"], e["label"], e["value"],
-                                   e["provenance"])
-                for e in pack["evidence"]}
-
-    sections_raw = None
-    for attempt in range(MAX_LOOP):
-        raw = provider.complete(depth, SYSTEM_PROMPT, user_prompt(pack))
-        sections_raw = _parse(raw)
-        if sections_raw is not None:
-            break
-        log.warning("analyst returned unparseable output (attempt %d)",
-                    attempt + 1)
-    if sections_raw is None:
+    # abstention check: redundancy context for the provider
+    pack["recent_briefs"] = len(db.briefs_for(card_id))
+    out = abstain_or_brief(pack, depth, provider)
+    if out.get("abstained"):
+        db.record("analyst_abstain", card_id,
+                  {"reason": out["reason"], "depth": depth,
+                   "units": UNITS[depth]})
+        return {**out, "card_id": card_id}
+    brief = out["brief"]
+    if brief is None or out.get("error"):
         db.record("analyst_rejected", card_id, {"reason": "unparseable"})
         return {"error": "analyst output unparseable after capped retries",
                 "card_id": card_id}
-
-    sections = {k: [Statement(s.get("text", ""), "analyst",
-                              list(s.get("cites", [])))
-                    for s in v] for k, v in sections_raw.items()
-                if isinstance(v, list)}
-    clean, dropped, status = gate_brief(sections, evidence)
-    brief = ResearchBrief(
-        card_id=card_id, depth=depth, provider=provider.name,
-        model=MODEL_FOR[depth] if provider.name == "claude" else "stub",
-        units=UNITS[depth], status=status,
-        sections={k: v for k, v in clean.items()},
-        evidence=list(evidence.values()), dropped=dropped,
-        created_at=_now())
     d = brief.to_dict()
     db.brief_add(d)
     db.record("analyst_brief", card_id,
-              {"depth": depth, "status": status, "units": UNITS[depth],
-               "dropped": len(dropped), "provider": provider.name})
-    if status == "rejected":
-        log.error("brief REJECTED for %s: %s", card_id, dropped[:3])
+              {"depth": depth, "status": brief.status,
+               "units": UNITS[depth], "dropped": len(brief.dropped),
+               "provider": provider.name})
+    if brief.status == "rejected":
+        log.error("brief REJECTED for %s: %s", card_id, brief.dropped[:3])
     return d
 
 

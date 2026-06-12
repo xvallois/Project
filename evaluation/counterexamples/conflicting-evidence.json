@@ -1,0 +1,49 @@
+{
+  "pack": {
+    "card_id": "vol_risk_premium|EURUSD|1M",
+    "headline": "1M IV-RV gap",
+    "pair": "EURUSD",
+    "band": "WATCH",
+    "findings": "f",
+    "invalidation": [
+      "metric reverts"
+    ],
+    "workspace_brief": "",
+    "evidence": [
+      {
+        "eid": "E1",
+        "label": "IV-RV gap",
+        "value": "+1.10vp",
+        "provenance": "packet.signals[1].score",
+        "tag": "supporting"
+      },
+      {
+        "eid": "E2",
+        "label": "SABR/SSVI divergence",
+        "value": "5.2vp",
+        "provenance": "packet.health.EURUSD.model_divergence_worst.volpts",
+        "tag": "contradiction"
+      },
+      {
+        "eid": "E3",
+        "label": "realized regime",
+        "value": "YZ 10d doubled vs 60d",
+        "provenance": "derived:card(realized|EURUSD|1M)",
+        "tag": "contradiction"
+      }
+    ]
+  },
+  "expect": {
+    "abstain_ok": true,
+    "if_brief": {
+      "allowed_status": [
+        "ok",
+        "degraded"
+      ],
+      "nonempty_sections": [
+        "contradictory"
+      ],
+      "max_dropped": 2
+    }
+  }
+}

@@ -10,6 +10,7 @@ Not a dashboard, not a chatbot — a structured decision environment:
 | Path | What |
 |---|---|
 | `frontend/` | React 18 + TS shell: Dockview docking, command grammar, feed, Analyst panel |
+| `engine/` | Vendored volwatch analytics engine (essential subset; see `engine/README.md`) |
 | `server/` | FastAPI sidecar importing the volwatch engine in-process; detectors, provenance gate, SQLite ledger, Analyst orchestrator |
 | `contracts/` | First-class interface contracts (schemas + protocol + provenance rules) |
 | `prompts/` | Versioned Analyst prompts (loaded at runtime) |
@@ -20,8 +21,7 @@ Not a dashboard, not a chatbot — a structured decision environment:
 
 ## Quick start
 ```bash
-export VW_ENGINE_PATH=/path/to/volwatch        # the analytics engine repo
-./scripts/setup.sh
+./scripts/setup.sh      # engine is vendored at ./engine (VW_ENGINE_PATH overrides)
 ./scripts/dev.sh        # sidecar :8787 (mock provider) + vite :5173
 ```
 On the desk: `VW_PROVIDER=bbg` (Bloomberg DAPI) or `bql` (BQuant), and

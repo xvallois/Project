@@ -1,0 +1,49 @@
+{
+  "pack": {
+    "card_id": "skew_richcheap|TRYZAR|1W",
+    "headline": "1W RR z +4.8 (stale quote)",
+    "pair": "TRYZAR",
+    "band": "WATCH",
+    "findings": "f",
+    "invalidation": [
+      "metric reverts"
+    ],
+    "workspace_brief": "",
+    "evidence": [
+      {
+        "eid": "E1",
+        "label": "z-score",
+        "value": "+4.80",
+        "provenance": "packet.signals[0].score",
+        "tag": "supporting"
+      },
+      {
+        "eid": "E2",
+        "label": "data quality",
+        "value": "stale quote flag set",
+        "provenance": "packet.signals[0].data_flags",
+        "tag": "contradiction"
+      },
+      {
+        "eid": "E3",
+        "label": "history depth",
+        "value": "12d only",
+        "provenance": "derived:count(store://vol/TRYZAR/1W/rr25)",
+        "tag": "contradiction"
+      }
+    ]
+  },
+  "expect": {
+    "abstain_ok": true,
+    "if_brief": {
+      "allowed_status": [
+        "ok",
+        "degraded"
+      ],
+      "nonempty_sections": [
+        "contradictory"
+      ],
+      "max_dropped": 2
+    }
+  }
+}

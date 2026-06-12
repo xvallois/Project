@@ -1,0 +1,183 @@
+{
+  "card_id": "triangle_correlation|EURGBP|3M triangle vs EURUSD/GBPUSD (sell cross vol / buy leg vols)",
+  "depth": "investigate",
+  "provider": "stub",
+  "model": "stub",
+  "units": 3,
+  "status": "degraded",
+  "sections": {
+    "finding": [
+      {
+        "text": "3M triangle vs EURUSD/GBPUSD (sell cross vol / buy leg vols): sell_corr z +7.1 \u2014 evidence-led read of the dislocation.",
+        "kind": "analyst",
+        "cites": [
+          "E1",
+          "E2"
+        ]
+      }
+    ],
+    "supporting": [
+      {
+        "text": "z-score stands at +7.07.",
+        "kind": "analyst",
+        "cites": [
+          "E1"
+        ]
+      },
+      {
+        "text": "edge estimate stands at +7.38vp.",
+        "kind": "analyst",
+        "cites": [
+          "E2"
+        ]
+      },
+      {
+        "text": "co-signal vol_risk_premium stands at 3M ATM (delta-hedged): sell_vol z +3.2.",
+        "kind": "analyst",
+        "cites": [
+          "E5"
+        ]
+      }
+    ],
+    "contradictory": [
+      {
+        "text": "Counterpoint: model disagreement (SABR/SSVI diverge 4.3vp).",
+        "kind": "analyst",
+        "cites": [
+          "E3"
+        ]
+      },
+      {
+        "text": "Counterpoint: SABR/SSVI worst divergence (4.28vp).",
+        "kind": "analyst",
+        "cites": [
+          "E12"
+        ]
+      }
+    ],
+    "why_now": [
+      {
+        "text": "The trigger is fresh this cycle and the structure has not yet mean-reverted.",
+        "kind": "analyst",
+        "cites": [
+          "E1",
+          "E2"
+        ]
+      }
+    ],
+    "invalidation": [],
+    "historical": [
+      {
+        "text": "Ledger: prior episode triangle_correlation|EURJPY|3M triangle vs EURUSD/USDJPY (buy cross vol / sell leg vols) \u2014 new \u2192 new.",
+        "kind": "analyst",
+        "cites": [
+          "E13"
+        ]
+      },
+      {
+        "text": "Ledger: triangle_correlation funnel to date \u2014 2 generated / 1 acted / 0 dismissed / 0 invalidated.",
+        "kind": "analyst",
+        "cites": [
+          "E14"
+        ]
+      }
+    ],
+    "next_investigation": [
+      {
+        "text": "Open the smile panel at the driving tenor and compare realized beta before sizing.",
+        "kind": "analyst",
+        "cites": []
+      }
+    ]
+  },
+  "evidence": [
+    {
+      "eid": "E1",
+      "label": "z-score",
+      "value": "+7.07",
+      "provenance": "packet.signals[0].score"
+    },
+    {
+      "eid": "E2",
+      "label": "edge estimate",
+      "value": "+7.38vp",
+      "provenance": "packet.signals[0].edge_estimate_volpts"
+    },
+    {
+      "eid": "E3",
+      "label": "model disagreement",
+      "value": "SABR/SSVI diverge 4.3vp",
+      "provenance": "packet.health.EURGBP.model_divergence_worst.volpts"
+    },
+    {
+      "eid": "E4",
+      "label": "same family elsewhere (EURJPY)",
+      "value": "3M triangle vs EURUSD/USDJPY (buy cross vol / sell leg vols): buy_corr z -3.8",
+      "provenance": "derived:card(triangle_correlation|EURJPY|3M triangle vs EURUSD/USDJPY (buy cross vol / sell leg vols))"
+    },
+    {
+      "eid": "E5",
+      "label": "co-signal vol_risk_premium",
+      "value": "3M ATM (delta-hedged): sell_vol z +3.2",
+      "provenance": "derived:card(vol_risk_premium|EURGBP|3M ATM (delta-hedged))"
+    },
+    {
+      "eid": "E6",
+      "label": "co-signal SURFACE_RICH",
+      "value": "rr25 rich across 3 tenors (lead 6M p99)",
+      "provenance": "derived:card(SKEW_PCTILE|EURGBP|*)"
+    },
+    {
+      "eid": "E7",
+      "label": "co-signal SURFACE_RICH",
+      "value": "atm rich across 5 tenors (lead 6M p96)",
+      "provenance": "derived:card(ATM_PCTILE|EURGBP|*)"
+    },
+    {
+      "eid": "E8",
+      "label": "co-signal vol_risk_premium",
+      "value": "6M ATM (delta-hedged): sell_vol z +3.6",
+      "provenance": "derived:card(vol_risk_premium|EURGBP|6M ATM (delta-hedged))"
+    },
+    {
+      "eid": "E9",
+      "label": "co-signal skew_richcheap",
+      "value": "1M 25d risk reversal: sell_skew z +2.4",
+      "provenance": "derived:card(skew_richcheap|EURGBP|1M 25d risk reversal)"
+    },
+    {
+      "eid": "E10",
+      "label": "co-signal SKEW_PCTILE",
+      "value": "1M rr25 at p100 of stored history",
+      "provenance": "derived:card(SKEW_PCTILE|EURGBP|1M)"
+    },
+    {
+      "eid": "E11",
+      "label": "co-signal SKEW_PCTILE",
+      "value": "ON rr25 at p4 of stored history",
+      "provenance": "derived:card(SKEW_PCTILE|EURGBP|ON)"
+    },
+    {
+      "eid": "E12",
+      "label": "SABR/SSVI worst divergence",
+      "value": "4.28vp",
+      "provenance": "packet.health.EURGBP.model_divergence_worst.volpts"
+    },
+    {
+      "eid": "E13",
+      "label": "prior episode triangle_correlation|EURJPY|3M triangle vs EURUSD/USDJPY (buy cross vol / sell leg vols)",
+      "value": "new \u2192 new",
+      "provenance": "ledger:card(triangle_correlation|EURJPY|3M triangle vs EURUSD/USDJPY (buy cross vol / sell leg vols))"
+    },
+    {
+      "eid": "E14",
+      "label": "triangle_correlation funnel to date",
+      "value": "2 generated / 1 acted / 0 dismissed / 0 invalidated",
+      "provenance": "ledger:funnel(triangle_correlation)"
+    }
+  ],
+  "dropped": [
+    "invalidation: uncited number '0.15' :: implied-realized corr gap < 0.15"
+  ],
+  "created_at": "2026-06-12T07:09:10.537084+00:00"
+}

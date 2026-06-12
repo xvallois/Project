@@ -1,0 +1,55 @@
+{
+  "ts": "2026-06-12T07:27:42.148927+00:00",
+  "provider": "stub",
+  "prompt_version": "v1",
+  "cases": 7,
+  "passed": 7,
+  "abstain_count": 4,
+  "results": [
+    {
+      "case": "pack-percentile",
+      "pass": true,
+      "why": [],
+      "dropped": 0,
+      "status": "ok"
+    },
+    {
+      "case": "pack-signal",
+      "pass": true,
+      "why": [],
+      "dropped": 0,
+      "status": "ok"
+    },
+    {
+      "case": "counter:conflicting-evidence",
+      "pass": true,
+      "why": [],
+      "abstained": true
+    },
+    {
+      "case": "counter:dramatic-low-quality",
+      "pass": true,
+      "why": [],
+      "abstained": true
+    },
+    {
+      "case": "counter:repeated-signal",
+      "pass": true,
+      "why": [],
+      "abstained": true
+    },
+    {
+      "case": "counter:stale-opportunity",
+      "pass": true,
+      "why": [],
+      "abstained": true
+    },
+    {
+      "case": "regression:fabricated-numbers",
+      "pass": true,
+      "why": [],
+      "status": "rejected",
+      "dropped": 1
+    }
+  ]
+}

@@ -1,0 +1,63 @@
+{
+  "id": "triangle_correlation|EURGBP|3M triangle vs EURUSD/GBPUSD (sell cross vol / buy leg vols)",
+  "type": "triangle_correlation",
+  "pair": "EURGBP",
+  "tenors": [
+    "3M"
+  ],
+  "headline": "3M triangle vs EURUSD/GBPUSD (sell cross vol / buy leg vols): sell_corr z +7.1",
+  "structure": "3M triangle vs EURUSD/GBPUSD (sell cross vol / buy leg vols)",
+  "band": "WATCH",
+  "confidence": {
+    "absZ": 7.067,
+    "persistedCycles": 4,
+    "dataQualityOk": true,
+    "modelsAgree": false,
+    "backtestPrior": {
+      "hitRate": 0.58,
+      "n": 21,
+      "placeholder": true
+    }
+  },
+  "findings": "",
+  "evidence": [
+    {
+      "label": "z-score",
+      "value": "+7.07",
+      "provenance": "packet.signals[0].score"
+    },
+    {
+      "label": "edge estimate",
+      "value": "+7.38vp",
+      "provenance": "packet.signals[0].edge_estimate_volpts"
+    }
+  ],
+  "supporting": [],
+  "contradictions": [
+    {
+      "label": "model disagreement",
+      "value": "SABR/SSVI diverge 4.3vp",
+      "provenance": "packet.health.EURGBP.model_divergence_worst.volpts"
+    }
+  ],
+  "invalidation_criteria": [
+    "implied-realized corr gap < 0.15",
+    "leg correlation regime shift"
+  ],
+  "similar_history_items": [
+    {
+      "label": "prior triangle_correlation|EURJPY|3M triangle vs EURUSD/USDJPY (buy cross vol / sell leg vols)",
+      "value": "new \u2192 new",
+      "provenance": "ledger:card(triangle_correlation|EURJPY|3M triangle vs EURUSD/USDJPY (buy cross vol / sell leg vols))"
+    }
+  ],
+  "similar_history_note": "from the decision ledger",
+  "status": "new",
+  "created_at": "2026-06-12T07:08:39.533822+00:00",
+  "updated_at": "2026-06-12T07:09:09.770500+00:00",
+  "detected_at": "2026-06-12T07:08:39.533822+00:00",
+  "dismissal": null,
+  "invalidation": null,
+  "analyst_rank": 1,
+  "analyst_note": "watch \u00b7 holds attention while the driver persists"
+}

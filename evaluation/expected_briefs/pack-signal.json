@@ -1,0 +1,16 @@
+{
+  "depth": "investigate",
+  "allowed_status": [
+    "ok",
+    "degraded"
+  ],
+  "nonempty_sections": [
+    "finding",
+    "supporting",
+    "historical",
+    "invalidation",
+    "next_investigation"
+  ],
+  "max_dropped": 2,
+  "must_cite_ledger": true
+}

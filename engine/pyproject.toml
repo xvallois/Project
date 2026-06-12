@@ -1,0 +1,18 @@
+[project]
+name = "volwatch"
+version = "0.1.0"
+description = "FX volatility monitoring & research assistant"
+requires-python = ">=3.11"
+dependencies = ["pydantic>=2", "pyyaml", "pandas", "pyarrow", "scipy",
+                "python-dateutil", "duckdb"]
+
+[project.optional-dependencies]
+bbg = ["blpapi"]
+speed = ["numba"]      # optional: jit kernels; numpy fallbacks otherwise
+dev = ["pytest", "pytest-cov", "ruff", "mypy"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.setuptools.packages.find]
+include = ["volwatch*"]

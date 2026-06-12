@@ -60,13 +60,24 @@ class StubProvider(AnalystProvider):
                  "attention while the driver persists"} for m in order]})
         payload = json.loads(user.split("EVIDENCE_JSON:\n", 1)[1])
         ev = payload["evidence"]
+        sup_n = sum(1 for e in ev if e["tag"] == "supporting")
+        con_n = sum(1 for e in ev if e["tag"] == "contradiction")
+        if payload.get("recent_briefs", 0) >= 2:
+            return json.dumps({"abstain": True, "reason":
+                "Already briefed twice this episode; nothing incremental "
+                "in the pack since."})
+        if sup_n == 0 or con_n > sup_n:
+            return json.dumps({"abstain": True, "reason":
+                "Evidence too thin or net-contradictory for a useful "
+                "note; the deterministic card already says it all."})
         by_tag = lambda t: [e["eid"] for e in ev if e["tag"] == t]
         sup, con, led = by_tag("supporting"), by_tag("contradiction"), \
             by_tag("ledger")
         first = lambda ids: ids[:2]
         sec = {
-            "finding": [{"text": payload["headline"]
-                         + " — evidence-led read of the dislocation.",
+            "finding": [{"text": f"{payload['pair']} "
+                         f"{payload['band'].lower()}-band dislocation — "
+                         "evidence-led read below.",
                          "cites": first(sup) or [ev[0]["eid"]]}],
             "supporting": [{"text": f"{e['label']} stands at {e['value']}.",
                             "cites": [e["eid"]]} for e in ev
@@ -79,9 +90,8 @@ class StubProvider(AnalystProvider):
             "why_now": [{"text": "The trigger is fresh this cycle and the "
                          "structure has not yet mean-reverted.",
                          "cites": first(sup)}],
-            "invalidation": [{"text": payload["invalidation"][0]
-                              if payload["invalidation"] else
-                              "Reversion of the driving metric.",
+            "invalidation": [{"text": "Watch for the driving metric "
+                              "mean-reverting or the regime breaking.",
                               "cites": []}],
             "historical": ([{"text": f"Ledger: {e['label']} — {e['value']}.",
                              "cites": [e["eid"]]} for e in ev

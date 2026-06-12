@@ -98,7 +98,8 @@ class Db:
              c["updated_at"],
              (c.get("dismissal") or {}).get("at"), json.dumps(c)))
 
-    def apply_cycle(self, detected: list[dict]) -> list[dict]:
+    def apply_cycle(self, detected: list[dict],
+                    band_fn=None) -> list[dict]:
         """Authoritative lifecycle merge; returns the changed cards."""
         now = _now()
         existing = {c["id"]: c for c in self.all_cards()}
@@ -120,14 +121,18 @@ class Db:
                 escalated = BAND_RANK[d["band"]] > BAND_RANK[prev["band"]]
                 if age < COOLDOWN_S and not escalated:
                     continue
-            merged = {**d, "created_at": prev["created_at"],
+            conf = {**d["confidence"],
+                    "persistedCycles": prev["confidence"].get(
+                        "persistedCycles", 1) + 1}
+            # persistence FEEDS banding (replay-found bug: bands were
+            # frozen at detect-time persisted=1 forever)
+            band = band_fn(conf) if band_fn else d["band"]
+            merged = {**d, "band": band,
+                      "created_at": prev["created_at"],
                       "detected_at": prev.get("detected_at",
                                               prev["created_at"]),
                       "updated_at": now,
-                      "confidence": {**d["confidence"],
-                                     "persistedCycles":
-                                     prev["confidence"].get(
-                                         "persistedCycles", 1) + 1},
+                      "confidence": conf,
                       "status": prev["status"]
                       if prev["status"] in ("watching", "acted")
                       else "new" if prev["status"] == "dismissed"
@@ -171,6 +176,56 @@ class Db:
         self.record(status, card_id, dismissal or {})
         self._con.commit()
         return c
+
+    # ------------------------------------------------ decision metrics
+    def decision_metrics(self) -> dict:
+        """signal_detected→surfaced→investigated→blottered→closed.
+        'generated' IS surfaced (same cycle, by construction)."""
+        rows = self._con.execute(
+            "SELECT card_id, event, ts FROM events WHERE card_id IS NOT "
+            "NULL ORDER BY ts").fetchall()
+        first: dict[str, dict[str, str]] = {}
+        for r in rows:
+            first.setdefault(r["card_id"], {}).setdefault(r["event"],
+                                                          r["ts"])
+        from datetime import datetime
+        def lat(a, b):
+            out = []
+            for ev in first.values():
+                if a in ev and b in ev:
+                    out.append((datetime.fromisoformat(ev[b])
+                                - datetime.fromisoformat(ev[a])
+                                ).total_seconds())
+            out.sort()
+            return round(out[len(out) // 2], 1) if out else None
+        gen = [c for c, ev in first.items() if "generated" in ev]
+        seen = [c for c in gen if "seen" in first[c]
+                or "watching" in first[c]]
+        inv_cards = [c for c in gen if "analyst_brief" in first[c]]
+        blot = [c for c in gen if "blotter_open" in first[c]]
+        ignored = [c for c in gen if "invalidated" in first[c]
+                   and c not in seen]
+        abst = sum(1 for r in rows if r["event"] == "analyst_abstain")
+        briefs = sum(1 for r in rows if r["event"] == "analyst_brief")
+        surf = self._con.execute(
+            "SELECT count(*) n FROM events WHERE event='surface_open'"
+        ).fetchone()["n"]
+        return {
+            "median_investigate_latency_s": lat("generated",
+                                                "analyst_brief"),
+            "median_decision_latency_s": lat("generated", "blotter_open"),
+            "median_close_latency_s": lat("blotter_open", "blotter_close"),
+            "generated": len(gen), "seen": len(seen),
+            "ignored": len(ignored), "acted": len(blot),
+            "investigate_rate": round(len(inv_cards) / len(gen), 3)
+            if gen else None,
+            "blotter_rate": round(len(blot) / len(gen), 3) if gen else None,
+            "investigation_conversion": round(len(blot) / len(inv_cards),
+                                              3) if inv_cards else None,
+            "analyst_abstain_rate": round(abst / (abst + briefs), 3)
+            if (abst + briefs) else None,
+            "surface_opens": surf,
+        }
 
     # ------------------------------------------------------------- briefs
     def brief_add(self, brief: dict) -> None:
