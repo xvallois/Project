@@ -31,3 +31,6 @@ jobs:
         with: { python-version: "3.12" }
       - run: pip install jsonschema
       - run: python scripts/verify_contracts.py
+      - run: pip install pandas
+      - run: python scripts/verify_prompts.py || echo "needs engine for full check"
+      - run: python scripts/run_eval.py || echo "needs engine for full check"

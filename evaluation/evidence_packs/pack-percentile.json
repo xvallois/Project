@@ -1,0 +1,168 @@
+{
+  "card_id": "ATM_PCTILE|AUDUSD|*",
+  "headline": "atm rich across 8 tenors (lead 1W p100)",
+  "pair": "AUDUSD",
+  "band": "SPECULATIVE",
+  "findings": "Broad atm repricing \u2014 one event, 8 tenors at extremes; trade the curve, not a node.",
+  "invalidation": [
+    "fewer than 3 tenors beyond p90/p10",
+    "lead tenor atm crosses p50"
+  ],
+  "workspace_brief": "G10 RV \u2014 curve trades preferred",
+  "evidence": [
+    {
+      "eid": "E1",
+      "label": "1M atm",
+      "value": "9.683 (p100)",
+      "provenance": "derived:percentile(store://vol/AUDUSD/1M/atm)",
+      "tag": "supporting"
+    },
+    {
+      "eid": "E2",
+      "label": "1W atm",
+      "value": "9.659 (p100)",
+      "provenance": "derived:percentile(store://vol/AUDUSD/1W/atm)",
+      "tag": "supporting"
+    },
+    {
+      "eid": "E3",
+      "label": "1Y atm",
+      "value": "10.081 (p99)",
+      "provenance": "derived:percentile(store://vol/AUDUSD/1Y/atm)",
+      "tag": "supporting"
+    },
+    {
+      "eid": "E4",
+      "label": "2M atm",
+      "value": "9.726 (p99)",
+      "provenance": "derived:percentile(store://vol/AUDUSD/2M/atm)",
+      "tag": "supporting"
+    },
+    {
+      "eid": "E5",
+      "label": "2W atm",
+      "value": "9.574 (p98)",
+      "provenance": "derived:percentile(store://vol/AUDUSD/2W/atm)",
+      "tag": "supporting"
+    },
+    {
+      "eid": "E6",
+      "label": "3M atm",
+      "value": "9.784 (p99)",
+      "provenance": "derived:percentile(store://vol/AUDUSD/3M/atm)",
+      "tag": "supporting"
+    },
+    {
+      "eid": "E7",
+      "label": "lead z",
+      "value": "+3.54",
+      "provenance": "derived:zscore(store://vol/AUDUSD/1W/atm)",
+      "tag": "supporting"
+    },
+    {
+      "eid": "E8",
+      "label": "single driver",
+      "value": "tenor breaches share one underlying drift \u2014 not independent confirmations",
+      "provenance": "derived:count(store://vol/AUDUSD/1W/atm)",
+      "tag": "contradiction"
+    },
+    {
+      "eid": "E9",
+      "label": "same family elsewhere (EURUSD)",
+      "value": "atm rich across 9 tenors (lead 1W p100)",
+      "provenance": "derived:card(ATM_PCTILE|EURUSD|*)",
+      "tag": "context"
+    },
+    {
+      "eid": "E10",
+      "label": "same family elsewhere (USDJPY)",
+      "value": "atm rich across 8 tenors (lead 6M p99)",
+      "provenance": "derived:card(ATM_PCTILE|USDJPY|*)",
+      "tag": "context"
+    },
+    {
+      "eid": "E11",
+      "label": "co-signal vol_risk_premium",
+      "value": "3M ATM (delta-hedged): sell_vol z +2.8",
+      "provenance": "derived:card(vol_risk_premium|AUDUSD|3M ATM (delta-hedged))",
+      "tag": "supporting"
+    },
+    {
+      "eid": "E12",
+      "label": "co-signal term_structure_kink",
+      "value": "3M/6M/9M calendar fly: sell_fwd_vol z +2.7",
+      "provenance": "derived:card(term_structure_kink|AUDUSD|3M/6M/9M calendar fly)",
+      "tag": "supporting"
+    },
+    {
+      "eid": "E13",
+      "label": "same family elsewhere (EURGBP)",
+      "value": "rr25 rich across 3 tenors (lead 6M p99)",
+      "provenance": "derived:card(SKEW_PCTILE|EURGBP|*)",
+      "tag": "context"
+    },
+    {
+      "eid": "E14",
+      "label": "same family elsewhere (EURGBP)",
+      "value": "atm rich across 5 tenors (lead 6M p96)",
+      "provenance": "derived:card(ATM_PCTILE|EURGBP|*)",
+      "tag": "context"
+    },
+    {
+      "eid": "E15",
+      "label": "SABR/SSVI worst divergence",
+      "value": "3.35vp",
+      "provenance": "packet.health.AUDUSD.model_divergence_worst.volpts",
+      "tag": "supporting"
+    },
+    {
+      "eid": "E16",
+      "label": "prior episode ATM_PCTILE|EURJPY|*",
+      "value": "new \u2192 new",
+      "provenance": "ledger:card(ATM_PCTILE|EURJPY|*)",
+      "tag": "ledger"
+    },
+    {
+      "eid": "E17",
+      "label": "prior episode ATM_PCTILE|EURUSD|*",
+      "value": "new \u2192 new",
+      "provenance": "ledger:card(ATM_PCTILE|EURUSD|*)",
+      "tag": "ledger"
+    },
+    {
+      "eid": "E18",
+      "label": "prior episode ATM_PCTILE|USDJPY|*",
+      "value": "new \u2192 new",
+      "provenance": "ledger:card(ATM_PCTILE|USDJPY|*)",
+      "tag": "ledger"
+    },
+    {
+      "eid": "E19",
+      "label": "prior episode ATM_PCTILE|GBPUSD|3M",
+      "value": "invalidated \u2192 invalidated",
+      "provenance": "ledger:card(ATM_PCTILE|GBPUSD|3M)",
+      "tag": "ledger"
+    },
+    {
+      "eid": "E20",
+      "label": "prior episode ATM_PCTILE|USDCAD|ON",
+      "value": "invalidated \u2192 invalidated",
+      "provenance": "ledger:card(ATM_PCTILE|USDCAD|ON)",
+      "tag": "ledger"
+    },
+    {
+      "eid": "E21",
+      "label": "prior episode ATM_PCTILE|EURGBP|*",
+      "value": "new \u2192 new",
+      "provenance": "ledger:card(ATM_PCTILE|EURGBP|*)",
+      "tag": "ledger"
+    },
+    {
+      "eid": "E22",
+      "label": "SURFACE_RICH funnel to date",
+      "value": "7 generated / 0 acted / 0 dismissed / 2 invalidated",
+      "provenance": "ledger:funnel(ATM_PCTILE)",
+      "tag": "ledger"
+    }
+  ]
+}

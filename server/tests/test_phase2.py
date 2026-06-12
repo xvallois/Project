@@ -203,9 +203,17 @@ class TestEndToEnd:
         for sec in ("finding", "supporting", "contradictory", "why_now",
                     "invalidation", "historical", "next_investigation"):
             assert sec in out["sections"]
-        for sec in out["sections"].values():
+        for name, sec in out["sections"].items():
             for st in sec:
-                assert st["kind"] == "analyst"
+                if name == "invalidation" and st["cites"] == []:
+                    # engine criteria backfilled as deterministic by design
+                    assert st["kind"] in ("analyst", "deterministic")
+                else:
+                    assert st["kind"] == "analyst"
+        # the engine's invalidation criteria always reach the brief
+        det = [st for st in out["sections"]["invalidation"]
+               if st["kind"] == "deterministic"]
+        assert det, "deterministic invalidation criteria missing"
         assert db.briefs_for(_card()["id"])           # persisted
         ev = db.telemetry_summary()["counts"]
         assert ev.get("analyst_brief", 0) == 1

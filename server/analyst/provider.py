@@ -65,8 +65,9 @@ class StubProvider(AnalystProvider):
             by_tag("ledger")
         first = lambda ids: ids[:2]
         sec = {
-            "finding": [{"text": payload["headline"]
-                         + " — evidence-led read of the dislocation.",
+            "finding": [{"text": f"{payload['pair']} "
+                         f"{payload['band'].lower()}-band dislocation — "
+                         "evidence-led read below.",
                          "cites": first(sup) or [ev[0]["eid"]]}],
             "supporting": [{"text": f"{e['label']} stands at {e['value']}.",
                             "cites": [e["eid"]]} for e in ev
@@ -79,9 +80,8 @@ class StubProvider(AnalystProvider):
             "why_now": [{"text": "The trigger is fresh this cycle and the "
                          "structure has not yet mean-reverted.",
                          "cites": first(sup)}],
-            "invalidation": [{"text": payload["invalidation"][0]
-                              if payload["invalidation"] else
-                              "Reversion of the driving metric.",
+            "invalidation": [{"text": "Watch for the driving metric "
+                              "mean-reverting or the regime breaking.",
                               "cites": []}],
             "historical": ([{"text": f"Ledger: {e['label']} — {e['value']}.",
                              "cites": [e["eid"]]} for e in ev

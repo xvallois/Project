@@ -1,0 +1,66 @@
+{
+  "id": "vol_risk_premium|USDJPY|6M ATM (delta-hedged)",
+  "type": "vol_risk_premium",
+  "pair": "USDJPY",
+  "tenors": [
+    "6M"
+  ],
+  "headline": "6M ATM (delta-hedged): sell_vol z +6.2",
+  "structure": "6M ATM (delta-hedged)",
+  "band": "WATCH",
+  "confidence": {
+    "absZ": 6.168,
+    "persistedCycles": 1,
+    "dataQualityOk": true,
+    "modelsAgree": true,
+    "backtestPrior": {
+      "hitRate": 0.52,
+      "n": 64,
+      "placeholder": true
+    }
+  },
+  "findings": "",
+  "evidence": [
+    {
+      "label": "z-score",
+      "value": "+6.17",
+      "provenance": "packet.signals[1].score"
+    },
+    {
+      "label": "edge estimate",
+      "value": "+1.13vp",
+      "provenance": "packet.signals[1].edge_estimate_volpts"
+    }
+  ],
+  "supporting": [],
+  "contradictions": [],
+  "invalidation_criteria": [
+    "IV-RV gap inside \u00b10.5vp",
+    "realized vol regime shift (YZ 10d vs 60d)"
+  ],
+  "similar_history_items": [
+    {
+      "label": "prior vol_risk_premium|AUDUSD|6M ATM (delta-hedged)",
+      "value": "new \u2192 new",
+      "provenance": "ledger:card(vol_risk_premium|AUDUSD|6M ATM (delta-hedged))"
+    },
+    {
+      "label": "prior vol_risk_premium|NZDUSD|3M ATM (delta-hedged)",
+      "value": "new \u2192 new",
+      "provenance": "ledger:card(vol_risk_premium|NZDUSD|3M ATM (delta-hedged))"
+    }
+  ],
+  "similar_history_note": "from the decision ledger",
+  "status": "invalidated",
+  "created_at": "2026-06-12T07:08:44.177260+00:00",
+  "updated_at": "2026-06-12T07:09:09.770500+00:00",
+  "detected_at": "2026-06-12T07:08:44.177260+00:00",
+  "dismissal": null,
+  "invalidation": {
+    "at": "2026-06-12T07:09:09.770500+00:00",
+    "outcome": "closed without action"
+  },
+  "analyst_rank": 2,
+  "analyst_note": "watch \u00b7 holds attention while the driver persists",
+  "_missing": 2
+}
