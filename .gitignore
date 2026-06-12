@@ -19,3 +19,6 @@ sidecar-data/
 # os / editor
 .DS_Store
 *.log
+
+# build artifacts
+*.tsbuildinfo
