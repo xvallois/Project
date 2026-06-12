@@ -1,0 +1,60 @@
+{
+  "ts": "2026-06-12T07:41:42.329171+00:00",
+  "release": "v3-rc1",
+  "prompt_version": "v1",
+  "workspace": "G10 RV",
+  "components": {
+    "investigate_rate": 0.033,
+    "blotter_rate": 0.016,
+    "survival": 0.557,
+    "manual_score": 0.7,
+    "dismissal_quality": 1.0
+  },
+  "usefulness_score": 0.397,
+  "decision_metrics": {
+    "median_investigate_latency_s": 27.4,
+    "median_decision_latency_s": 27.4,
+    "median_close_latency_s": 0.0,
+    "generated": 61,
+    "seen": 3,
+    "ignored": 27,
+    "acted": 1,
+    "investigate_rate": 0.033,
+    "blotter_rate": 0.016,
+    "investigation_conversion": 0.5,
+    "analyst_abstain_rate": 0.4,
+    "surface_opens": 4
+  },
+  "by_signal_family": {
+    "ATM_PCTILE": {
+      "generated": 9,
+      "investigate_rate": 0.0,
+      "blotter_rate": 0.0
+    },
+    "SKEW_PCTILE": {
+      "generated": 24,
+      "investigate_rate": 0.0,
+      "blotter_rate": 0.0
+    },
+    "skew_richcheap": {
+      "generated": 3,
+      "investigate_rate": 0.0,
+      "blotter_rate": 0.0
+    },
+    "term_structure_kink": {
+      "generated": 11,
+      "investigate_rate": 0.0,
+      "blotter_rate": 0.0
+    },
+    "triangle_correlation": {
+      "generated": 2,
+      "investigate_rate": 1.0,
+      "blotter_rate": 0.5
+    },
+    "vol_risk_premium": {
+      "generated": 12,
+      "investigate_rate": 0.0,
+      "blotter_rate": 0.0
+    }
+  }
+}

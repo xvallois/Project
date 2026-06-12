@@ -1,0 +1,25 @@
+{
+  "pack": {
+    "card_id": "ATM_PCTILE|AUDUSD|1Y",
+    "headline": "1Y atm was p96 five days ago",
+    "pair": "AUDUSD",
+    "band": "WATCH",
+    "findings": "f",
+    "invalidation": [
+      "metric reverts"
+    ],
+    "workspace_brief": "",
+    "evidence": [
+      {
+        "eid": "E1",
+        "label": "same family elsewhere (NZDUSD)",
+        "value": "also faded",
+        "provenance": "derived:card(ATM_PCTILE|NZDUSD|1Y)",
+        "tag": "context"
+      }
+    ]
+  },
+  "expect": {
+    "abstain_required": true
+  }
+}

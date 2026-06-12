@@ -53,6 +53,34 @@ def main() -> int:
         if not ok:
             failures.append(f.stem)
 
+    # counterexamples (anti-overfitting set): dramatic/conflicting/
+    # repeated/stale packs — abstention is a PASS where expected
+    from server.analyst.engine import abstain_or_brief
+    for f in sorted((E / "counterexamples").glob("*.json")):
+        case = json.loads(f.read_text())
+        out = abstain_or_brief(case["pack"], "investigate", prov)
+        exp = case["expect"]
+        ok, why = True, []
+        if out.get("abstained"):
+            if not (exp.get("abstain_required") or exp.get("abstain_ok")):
+                ok, why = False, ["unexpected abstention"]
+        else:
+            if exp.get("abstain_required"):
+                ok, why = False, ["should have abstained"]
+            elif "if_brief" in exp:
+                d = out["brief"].to_dict()
+                ib = exp["if_brief"]
+                if d["status"] not in ib["allowed_status"]:
+                    ok = False; why.append(f"status {d['status']}")
+                for sec in ib.get("nonempty_sections", []):
+                    if not d["sections"].get(sec):
+                        ok = False; why.append(f"empty {sec}")
+        results.append({"case": f"counter:{f.stem}", "pass": ok,
+                        "why": why,
+                        "abstained": bool(out.get("abstained"))})
+        if not ok:
+            failures.append(f.stem)
+
     # regressions: raw provider outputs that MUST be stopped by the gate
     for f in sorted((E / "regressions").glob("*.json")):
         case = json.loads(f.read_text())
@@ -79,6 +107,8 @@ def main() -> int:
                if (ROOT / "prompts" / "current").is_symlink() else "v?",
                "cases": len(results),
                "passed": sum(r["pass"] for r in results),
+               "abstain_count": sum(1 for r in results
+                                    if r.get("abstained")),
                "results": results}
     (E / "metrics" / "latest.json").write_text(json.dumps(metrics, indent=2))
     (E / "metrics" / f"{metrics['ts'][:19].replace(':', '')}.json"

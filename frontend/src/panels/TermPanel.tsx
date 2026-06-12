@@ -2,6 +2,7 @@
  *  repricing at a point (kink → calendar trade) or in level (regime)?" */
 import { useEffect, useState } from "react";
 import { getTerm } from "../api/client";
+import { postSurfaceOpen } from "../api/client";
 import { usePanelContext, type PanelParams } from "../shell/DockHost";
 import { useEngine } from "../state/engine";
 
@@ -14,6 +15,7 @@ export function TermPanel({ params }: { params: PanelParams }) {
   const health = useEngine((s) => s.health);
   const [d, setD] = useState<Record<string,
     { tenor: string; atm: number }[]>>({});
+  useEffect(() => { postSurfaceOpen("term", pair); }, [pair]);
   useEffect(() => { getTerm(pair).then((t) => setD(t.series))
     .catch(() => setD({})); }, [pair, health.last_cycle]);
   const today = d.today ?? [];

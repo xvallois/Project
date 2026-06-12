@@ -2,8 +2,8 @@
  *  Expanded cards show the analyst-shaped sections; every number renders
  *  with its provenance ref on hover (the chain ends at the screen). */
 import { useEffect, useMemo, useState } from "react";
-import { getDriver, type DriverSeries, type ServerCard, type ServerItem }
-  from "../api/client";
+import { getDriver, postSurfaceOpen, type DriverSeries, type ServerCard,
+  type ServerItem } from "../api/client";
 import { useUi } from "../state/stores";
 import { DISMISSAL_REASONS, type DismissalReason }
   from "../core/opportunities/types";
@@ -21,7 +21,8 @@ const Ref = ({ i }: { i: ServerItem }) => (
 
 function Driver({ id }: { id: string }) {
   const [d, setD] = useState<DriverSeries | null>(null);
-  useEffect(() => { getDriver(id).then(setD).catch(() => null); }, [id]);
+  useEffect(() => { getDriver(id).then(setD).catch(() => null);
+    postSurfaceOpen("driver", undefined, undefined, id); }, [id]);
   if (!d || !d.series.length) return null;
   const vs = d.series.map((p) => p.value);
   const lo = Math.min(...vs), hi = Math.max(...vs) || lo + 1;

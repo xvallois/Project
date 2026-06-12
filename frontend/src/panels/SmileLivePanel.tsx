@@ -3,6 +3,7 @@
  *  Cone = own 1y p10-p90; dashed overlay = the smile 5 sessions back. */
 import { useEffect, useState } from "react";
 import { getSmile, type SmileNode } from "../api/client";
+import { postSurfaceOpen } from "../api/client";
 import { usePanelContext, type PanelParams } from "../shell/DockHost";
 import { useEngine } from "../state/engine";
 
@@ -14,6 +15,7 @@ export function SmileLivePanel({ params }: { params: PanelParams }) {
   const health = useEngine((s) => s.health);
   const [d, setD] = useState<{ nodes: SmileNode[]; asof?: string;
     t5_date?: string; provenance?: string }>({ nodes: [] });
+  useEffect(() => { postSurfaceOpen("smile", pair, tenor); }, [pair,tenor]);
   useEffect(() => { getSmile(pair, tenor).then(setD)
     .catch(() => setD({ nodes: [] })); }, [pair, tenor, health.last_cycle]);
   if (!d.nodes.length) return <div className="phase-note">

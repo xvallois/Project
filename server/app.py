@@ -29,7 +29,7 @@ from server.analyst.engine import investigate as run_investigation
 from server.analyst.engine import triage as run_triage
 from server.analyst.provider import AnthropicProvider, StubProvider
 from server.db import Db
-from server.detectors import detect
+from server.detectors import band_for, detect
 from server.provenance import ProvenanceVerifier
 from server.surfaces import driver as surf_driver
 from server.surfaces import heat as surf_heat
@@ -150,7 +150,13 @@ def run_cycle_sync() -> list[dict]:
                  "value": f"{e['status']} → {e['outcome']}",
                  "provenance": f"ledger:card({e['id']})"} for e in eps[:4]]
             c["similar_history_note"] = "from the decision ledger"
-    changed = S.db.apply_cycle(clean)
+    def _band(conf: dict) -> str:
+        prior = conf.get("backtestPrior")
+        return band_for(conf["absZ"], conf["persistedCycles"],
+                        conf["dataQualityOk"], conf["modelsAgree"],
+                        bool(prior and prior.get("hitRate", 0) >= 0.55
+                             and prior.get("n", 0) >= 20))
+    changed = S.db.apply_cycle(clean, band_fn=_band)
     if S.analyst is not None:
         try:
             run_triage(S.db, S.packet, S.analyst)
@@ -354,6 +360,25 @@ async def post_postmortem(bid: str):
         S.db, S.packet, S.analyst)
     await hub.publish("brief", brief)
     return brief
+
+
+class TelemetryEvent(BaseModel):
+    event: str                       # e.g. surface_open
+    card_id: str | None = None
+    payload: dict = {}
+
+
+@app.post("/api/telemetry/event")
+def post_event(e: TelemetryEvent):
+    if not e.event.startswith(("surface_", "session_")):
+        return {"ok": False, "reason": "client may only emit surface_/session_ events"}
+    S.db.record(e.event, e.card_id, e.payload)
+    return {"ok": True}
+
+
+@app.get("/api/metrics/decisions")
+def get_decision_metrics():
+    return S.db.decision_metrics()
 
 
 @app.get("/api/telemetry/summary")

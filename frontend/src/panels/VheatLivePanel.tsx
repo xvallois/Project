@@ -4,6 +4,7 @@
  *  the smile — the heatmap is a router into the flow, not a picture. */
 import { useEffect, useState } from "react";
 import { getHeat, type HeatRow } from "../api/client";
+import { postSurfaceOpen } from "../api/client";
 import { usePanelContext, type PanelParams } from "../shell/DockHost";
 import { useEngine } from "../state/engine";
 import { useUi, useWorkspaces } from "../state/stores";
@@ -23,6 +24,7 @@ export function VheatLivePanel({ params }: { params: PanelParams }) {
   const [rows, setRows] = useState<HeatRow[]>([]);
   const [days, setDays] = useState(0);
   const [lens, setLens] = useState<Lens>("%ILE");
+  useEffect(() => { postSurfaceOpen("heat", pair); }, [pair]);
   useEffect(() => { getHeat(pair).then((h) => { setRows(h.rows);
     setDays(h.history_days); }).catch(() => setRows([])); },
     [pair, health.last_cycle]);

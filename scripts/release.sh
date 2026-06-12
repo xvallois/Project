@@ -6,11 +6,17 @@ REVIEW="${3:-artifacts/release-reviews/${TAG}.md}"
 cd "$(dirname "$0")/.."
 echo "== gate 1/5: tests + contracts =="; ./scripts/test.sh
 echo "== gate 2/5: prompt compatibility =="; python3 scripts/verify_prompts.py
-echo "== gate 3/5: evaluation set =="; python3 scripts/run_eval.py
-echo "== gate 4/5: soak =="; echo "  run tests/soak.md and record below"
+echo "== gate 3/7: evaluation set (incl. counterexamples) =="; python3 scripts/run_eval.py
+echo "== gate 4/7: decision-session replay =="
+for S in review/decision_session/*.json; do
+  [ -e "$S" ] && python3 scripts/replay_session.py "$S"; done
+echo "== gate 5/7: usefulness + anti-overfit =="
+read -p "  manual usefulness (useful/10 from review, e.g. 0.7): " MU
+python3 scripts/usefulness.py --manual "$MU" --release "$TAG"
+echo "== gate 6/7: soak =="; echo "  run tests/soak.md and record below"
 read -p "  soak baselines met (feed<50ms, 0 rejects, restart ok)? [y/N] " S
 [ "$S" = "y" ] || { echo "soak gate failed"; exit 1; }
-echo "== gate 5/5: performance =="
+echo "== gate 7/7: performance =="
 GZ=$(cd frontend && npm run build 2>/dev/null | grep -o '[0-9.]* kB' | tail -1 | cut -d' ' -f1)
 echo "  bundle ${GZ}kB gz (budget 150)"; python3 -c "exit(0 if float('${GZ:-999}')<=150 else 1)"
 echo "== manual gates =="

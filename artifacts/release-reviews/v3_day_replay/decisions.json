@@ -1,0 +1,19 @@
+[
+ {
+  "id": "0e75129a-13d2-465c-8872-7fbffbce628d",
+  "kind": "paper",
+  "status": "closed",
+  "pair": "EURGBP",
+  "structure": "3M triangle vs EURUSD/GBPUSD (sell cross vol / buy leg vols)",
+  "direction": "triangle_correlation",
+  "linked_opportunity_id": "triangle_correlation|EURGBP|3M triangle vs EURUSD/GBPUSD (sell cross vol / buy leg vols)",
+  "entry_thesis": "3M triangle vs EURUSD/GBPUSD (sell cross vol / buy leg vols): sell_corr z +7.1 | z-score=+7.07 [packet.signals[0].score]; edge estimate=+7.38vp [packet.signals[0].edge_estimate_volpts]",
+  "size": null,
+  "pnl_volpts": 0.55,
+  "pnl_ccy": null,
+  "notes": "converged into the close; sized small",
+  "post_mortem": null,
+  "opened_at": "2026-06-12T07:40:47.208363+00:00",
+  "closed_at": "2026-06-12T07:40:47.245813+00:00"
+ }
+]

@@ -32,6 +32,7 @@ export interface ResearchBrief {
   sections: Record<string, BriefStatement[]>;
   evidence: BriefEvidence[]; dropped: string[]; created_at: string;
   refused?: string; error?: string;
+  abstained?: boolean; reason?: string;     // abstention: event, not brief
 }
 export interface WsEnvelope { topic: string; type: "snapshot" | "delta";
   seq: number; ts: string; data: any }
@@ -121,3 +122,12 @@ export const getDriver = async (card_id: string) =>
   (await fetch(`${API}/api/driver`, { method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ card_id }) })).json() as Promise<DriverSeries>;
+
+/** Fire-and-forget surface telemetry (decision-latency dataset). */
+export function postSurfaceOpen(surface: string, pair?: string,
+  tenor?: string, card_id?: string): void {
+  fetch(`${API}/api/telemetry/event`, { method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ event: "surface_open", card_id,
+      payload: { surface, pair, tenor } }) }).catch(() => undefined);
+}

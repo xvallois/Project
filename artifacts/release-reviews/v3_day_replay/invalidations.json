@@ -1,0 +1,482 @@
+[
+ {
+  "id": "ATM_PCTILE|EURGBP|*",
+  "type": "SURFACE_RICH",
+  "pair": "EURGBP",
+  "tenors": [
+   "1Y",
+   "2M",
+   "2W",
+   "6M",
+   "9M"
+  ],
+  "headline": "atm rich across 5 tenors (lead 6M p96)",
+  "structure": "atm curve",
+  "band": "WATCH",
+  "confidence": {
+   "absZ": 1.5,
+   "persistedCycles": 3,
+   "dataQualityOk": true,
+   "modelsAgree": true,
+   "backtestPrior": null
+  },
+  "findings": "Broad atm repricing \u2014 one event, 5 tenors at extremes; trade the curve, not a node.",
+  "evidence": [
+   {
+    "label": "1Y atm",
+    "value": "6.447 (p92)",
+    "provenance": "derived:percentile(store://vol/EURGBP/1Y/atm)"
+   },
+   {
+    "label": "2M atm",
+    "value": "6.132 (p93)",
+    "provenance": "derived:percentile(store://vol/EURGBP/2M/atm)"
+   },
+   {
+    "label": "2W atm",
+    "value": "6.026 (p90)",
+    "provenance": "derived:percentile(store://vol/EURGBP/2W/atm)"
+   },
+   {
+    "label": "6M atm",
+    "value": "6.337 (p96)",
+    "provenance": "derived:percentile(store://vol/EURGBP/6M/atm)"
+   },
+   {
+    "label": "9M atm",
+    "value": "6.369 (p90)",
+    "provenance": "derived:percentile(store://vol/EURGBP/9M/atm)"
+   }
+  ],
+  "supporting": [
+   {
+    "label": "lead z",
+    "value": "+1.50",
+    "provenance": "derived:zscore(store://vol/EURGBP/6M/atm)"
+   }
+  ],
+  "contradictions": [
+   {
+    "label": "single driver",
+    "value": "tenor breaches share one underlying drift \u2014 not independent confirmations",
+    "provenance": "derived:count(store://vol/EURGBP/6M/atm)"
+   }
+  ],
+  "invalidation_criteria": [
+   "fewer than 3 tenors beyond p90/p10",
+   "lead tenor atm crosses p50"
+  ],
+  "similar_history_items": [
+   {
+    "label": "prior ATM_PCTILE|AUDUSD|*",
+    "value": "new \u2192 new",
+    "provenance": "ledger:card(ATM_PCTILE|AUDUSD|*)"
+   },
+   {
+    "label": "prior ATM_PCTILE|EURJPY|*",
+    "value": "new \u2192 new",
+    "provenance": "ledger:card(ATM_PCTILE|EURJPY|*)"
+   },
+   {
+    "label": "prior ATM_PCTILE|EURUSD|*",
+    "value": "new \u2192 new",
+    "provenance": "ledger:card(ATM_PCTILE|EURUSD|*)"
+   },
+   {
+    "label": "prior ATM_PCTILE|USDJPY|*",
+    "value": "new \u2192 new",
+    "provenance": "ledger:card(ATM_PCTILE|USDJPY|*)"
+   }
+  ],
+  "similar_history_note": "from the decision ledger",
+  "status": "invalidated",
+  "created_at": "2026-06-12T07:40:19.704967+00:00",
+  "updated_at": "2026-06-12T07:40:55.688302+00:00",
+  "detected_at": "2026-06-12T07:40:19.704967+00:00",
+  "dismissal": null,
+  "invalidation": {
+   "at": "2026-06-12T07:40:55.688302+00:00",
+   "outcome": "closed without action"
+  },
+  "analyst_rank": 7,
+  "analyst_note": "watch \u00b7 holds attention while the driver persists",
+  "_missing": 2
+ },
+ {
+  "id": "SKEW_PCTILE|USDJPY|ON",
+  "type": "SKEW_PCTILE",
+  "pair": "USDJPY",
+  "tenors": [
+   "ON"
+  ],
+  "headline": "ON rr25 at p3 of stored history",
+  "structure": "ON 25d risk reversal",
+  "band": "WATCH",
+  "confidence": {
+   "absZ": 1.85,
+   "persistedCycles": 1,
+   "dataQualityOk": true,
+   "modelsAgree": true,
+   "backtestPrior": null
+  },
+  "findings": "rr25 at the cheap extreme of everything this store has seen (90d).",
+  "evidence": [
+   {
+    "label": "rr25",
+    "value": "-1.075",
+    "provenance": "store://vol/USDJPY/ON/rr25"
+   },
+   {
+    "label": "percentile",
+    "value": "p3",
+    "provenance": "derived:percentile(store://vol/USDJPY/ON/rr25)"
+   },
+   {
+    "label": "z-score",
+    "value": "-1.85",
+    "provenance": "derived:zscore(store://vol/USDJPY/ON/rr25)"
+   }
+  ],
+  "supporting": [
+   {
+    "label": "history depth",
+    "value": "90d",
+    "provenance": "derived:count(store://vol/USDJPY/ON/rr25)"
+   }
+  ],
+  "contradictions": [
+   {
+    "label": "shallow history",
+    "value": "only 90d \u2014 percentile unstable",
+    "provenance": "derived:count(store://vol/USDJPY/ON/rr25)"
+   }
+  ],
+  "invalidation_criteria": [
+   "rr25 crosses p50",
+   "history depth < 40d after a data-quality purge"
+  ],
+  "similar_history_items": [
+   {
+    "label": "prior (placeholder)",
+    "value": "no prior",
+    "provenance": "prior:skew_pctile"
+   }
+  ],
+  "similar_history_note": "placeholder \u2014 episode search ships with backtest dataset",
+  "status": "invalidated",
+  "created_at": "2026-06-12T07:40:19.704967+00:00",
+  "updated_at": "2026-06-12T07:40:55.688302+00:00",
+  "detected_at": "2026-06-12T07:40:19.704967+00:00",
+  "dismissal": null,
+  "invalidation": {
+   "at": "2026-06-12T07:40:55.688302+00:00",
+   "outcome": "closed without action"
+  },
+  "_missing": 2
+ },
+ {
+  "id": "term_structure_kink|NZDUSD|1W/2W/1M calendar fly",
+  "type": "term_structure_kink",
+  "pair": "NZDUSD",
+  "tenors": [
+   "1W",
+   "2W",
+   "1M"
+  ],
+  "headline": "1W/2W/1M calendar fly: buy_fwd_vol z -2.7",
+  "structure": "1W/2W/1M calendar fly",
+  "band": "ACTIONABLE",
+  "confidence": {
+   "absZ": 2.711,
+   "persistedCycles": 1,
+   "dataQualityOk": true,
+   "modelsAgree": true,
+   "backtestPrior": {
+    "hitRate": 0.55,
+    "n": 37,
+    "placeholder": true
+   }
+  },
+  "findings": "",
+  "evidence": [
+   {
+    "label": "z-score",
+    "value": "-2.71",
+    "provenance": "packet.signals[4].score"
+   },
+   {
+    "label": "edge estimate",
+    "value": "-0.13vp",
+    "provenance": "packet.signals[4].edge_estimate_volpts"
+   }
+  ],
+  "supporting": [],
+  "contradictions": [],
+  "invalidation_criteria": [
+   "kink residual < 0.05vp",
+   "neighbouring tenor repriced (kink migrates)"
+  ],
+  "similar_history_items": [
+   {
+    "label": "prior term_structure_kink|GBPUSD|2M/3M/6M calendar fly",
+    "value": "new \u2192 new",
+    "provenance": "ledger:card(term_structure_kink|GBPUSD|2M/3M/6M calendar fly)"
+   },
+   {
+    "label": "prior term_structure_kink|GBPUSD|1M/2M/3M calendar fly",
+    "value": "new \u2192 new",
+    "provenance": "ledger:card(term_structure_kink|GBPUSD|1M/2M/3M calendar fly)"
+   },
+   {
+    "label": "prior term_structure_kink|USDJPY|ON/1W/2W calendar fly",
+    "value": "new \u2192 new",
+    "provenance": "ledger:card(term_structure_kink|USDJPY|ON/1W/2W calendar fly)"
+   },
+   {
+    "label": "prior term_structure_kink|EURGBP|2W/1M/2M calendar fly",
+    "value": "new \u2192 new",
+    "provenance": "ledger:card(term_structure_kink|EURGBP|2W/1M/2M calendar fly)"
+   }
+  ],
+  "similar_history_note": "from the decision ledger",
+  "status": "invalidated",
+  "created_at": "2026-06-12T07:40:34.637092+00:00",
+  "updated_at": "2026-06-12T07:40:55.688302+00:00",
+  "detected_at": "2026-06-12T07:40:34.637092+00:00",
+  "dismissal": null,
+  "invalidation": {
+   "at": "2026-06-12T07:40:55.688302+00:00",
+   "outcome": "closed without action"
+  },
+  "_missing": 2
+ },
+ {
+  "id": "skew_richcheap|EURGBP|1M 25d risk reversal",
+  "type": "skew_richcheap",
+  "pair": "EURGBP",
+  "tenors": [
+   "1M"
+  ],
+  "headline": "1M 25d risk reversal: sell_skew z +2.4",
+  "structure": "1M 25d risk reversal",
+  "band": "WATCH",
+  "confidence": {
+   "absZ": 2.402,
+   "persistedCycles": 1,
+   "dataQualityOk": true,
+   "modelsAgree": false,
+   "backtestPrior": {
+    "hitRate": 0.61,
+    "n": 42,
+    "placeholder": true
+   }
+  },
+  "findings": "",
+  "evidence": [
+   {
+    "label": "z-score",
+    "value": "+2.40",
+    "provenance": "packet.signals[5].score"
+   },
+   {
+    "label": "edge estimate",
+    "value": "+0.07vp",
+    "provenance": "packet.signals[5].edge_estimate_volpts"
+   }
+  ],
+  "supporting": [],
+  "contradictions": [
+   {
+    "label": "model disagreement",
+    "value": "SABR/SSVI diverge 4.1vp",
+    "provenance": "packet.health.EURGBP.model_divergence_worst.volpts"
+   }
+  ],
+  "invalidation_criteria": [
+   "|z| reverts inside \u00b11.0",
+   "RR percentile crosses p50",
+   "spot-vol beta regime breaks (delivered follows implied)"
+  ],
+  "similar_history_items": [
+   {
+    "label": "prior skew_richcheap|USDCAD|3M 25d risk reversal",
+    "value": "new \u2192 new",
+    "provenance": "ledger:card(skew_richcheap|USDCAD|3M 25d risk reversal)"
+   }
+  ],
+  "similar_history_note": "from the decision ledger",
+  "status": "invalidated",
+  "created_at": "2026-06-12T07:40:34.637092+00:00",
+  "updated_at": "2026-06-12T07:40:55.688302+00:00",
+  "detected_at": "2026-06-12T07:40:34.637092+00:00",
+  "dismissal": null,
+  "invalidation": {
+   "at": "2026-06-12T07:40:55.688302+00:00",
+   "outcome": "closed without action"
+  },
+  "_missing": 2
+ },
+ {
+  "id": "term_structure_kink|NZDUSD|2W/1M/2M calendar fly",
+  "type": "term_structure_kink",
+  "pair": "NZDUSD",
+  "tenors": [
+   "2W",
+   "1M",
+   "2M"
+  ],
+  "headline": "2W/1M/2M calendar fly: sell_fwd_vol z +2.3",
+  "structure": "2W/1M/2M calendar fly",
+  "band": "WATCH",
+  "confidence": {
+   "absZ": 2.297,
+   "persistedCycles": 1,
+   "dataQualityOk": true,
+   "modelsAgree": true,
+   "backtestPrior": {
+    "hitRate": 0.55,
+    "n": 37,
+    "placeholder": true
+   }
+  },
+  "findings": "",
+  "evidence": [
+   {
+    "label": "z-score",
+    "value": "+2.30",
+    "provenance": "packet.signals[7].score"
+   },
+   {
+    "label": "edge estimate",
+    "value": "+0.11vp",
+    "provenance": "packet.signals[7].edge_estimate_volpts"
+   }
+  ],
+  "supporting": [],
+  "contradictions": [],
+  "invalidation_criteria": [
+   "kink residual < 0.05vp",
+   "neighbouring tenor repriced (kink migrates)"
+  ],
+  "similar_history_items": [
+   {
+    "label": "prior term_structure_kink|GBPUSD|2M/3M/6M calendar fly",
+    "value": "new \u2192 new",
+    "provenance": "ledger:card(term_structure_kink|GBPUSD|2M/3M/6M calendar fly)"
+   },
+   {
+    "label": "prior term_structure_kink|GBPUSD|1M/2M/3M calendar fly",
+    "value": "new \u2192 new",
+    "provenance": "ledger:card(term_structure_kink|GBPUSD|1M/2M/3M calendar fly)"
+   },
+   {
+    "label": "prior term_structure_kink|USDJPY|ON/1W/2W calendar fly",
+    "value": "new \u2192 new",
+    "provenance": "ledger:card(term_structure_kink|USDJPY|ON/1W/2W calendar fly)"
+   },
+   {
+    "label": "prior term_structure_kink|EURGBP|2W/1M/2M calendar fly",
+    "value": "new \u2192 new",
+    "provenance": "ledger:card(term_structure_kink|EURGBP|2W/1M/2M calendar fly)"
+   }
+  ],
+  "similar_history_note": "from the decision ledger",
+  "status": "invalidated",
+  "created_at": "2026-06-12T07:40:34.637092+00:00",
+  "updated_at": "2026-06-12T07:40:55.688302+00:00",
+  "detected_at": "2026-06-12T07:40:34.637092+00:00",
+  "dismissal": null,
+  "invalidation": {
+   "at": "2026-06-12T07:40:55.688302+00:00",
+   "outcome": "closed without action"
+  },
+  "_missing": 2
+ },
+ {
+  "id": "SKEW_PCTILE|EURGBP|1M",
+  "type": "SKEW_PCTILE",
+  "pair": "EURGBP",
+  "tenors": [
+   "1M"
+  ],
+  "headline": "1M rr25 at p100 of stored history",
+  "structure": "1M 25d risk reversal",
+  "band": "WATCH",
+  "confidence": {
+   "absZ": 2.51,
+   "persistedCycles": 1,
+   "dataQualityOk": true,
+   "modelsAgree": true,
+   "backtestPrior": null
+  },
+  "findings": "rr25 at the rich extreme of everything this store has seen (90d).",
+  "evidence": [
+   {
+    "label": "rr25",
+    "value": "-0.133",
+    "provenance": "store://vol/EURGBP/1M/rr25"
+   },
+   {
+    "label": "percentile",
+    "value": "p100",
+    "provenance": "derived:percentile(store://vol/EURGBP/1M/rr25)"
+   },
+   {
+    "label": "z-score",
+    "value": "+2.51",
+    "provenance": "derived:zscore(store://vol/EURGBP/1M/rr25)"
+   }
+  ],
+  "supporting": [
+   {
+    "label": "history depth",
+    "value": "90d",
+    "provenance": "derived:count(store://vol/EURGBP/1M/rr25)"
+   }
+  ],
+  "contradictions": [
+   {
+    "label": "shallow history",
+    "value": "only 90d \u2014 percentile unstable",
+    "provenance": "derived:count(store://vol/EURGBP/1M/rr25)"
+   }
+  ],
+  "invalidation_criteria": [
+   "rr25 crosses p50",
+   "history depth < 40d after a data-quality purge"
+  ],
+  "similar_history_items": [
+   {
+    "label": "prior SKEW_PCTILE|AUDUSD|9M",
+    "value": "new \u2192 new",
+    "provenance": "ledger:card(SKEW_PCTILE|AUDUSD|9M)"
+   },
+   {
+    "label": "prior SKEW_PCTILE|GBPUSD|3M",
+    "value": "new \u2192 new",
+    "provenance": "ledger:card(SKEW_PCTILE|GBPUSD|3M)"
+   },
+   {
+    "label": "prior SKEW_PCTILE|NZDUSD|ON",
+    "value": "new \u2192 new",
+    "provenance": "ledger:card(SKEW_PCTILE|NZDUSD|ON)"
+   },
+   {
+    "label": "prior SKEW_PCTILE|USDCAD|3M",
+    "value": "new \u2192 new",
+    "provenance": "ledger:card(SKEW_PCTILE|USDCAD|3M)"
+   }
+  ],
+  "similar_history_note": "from the decision ledger",
+  "status": "invalidated",
+  "created_at": "2026-06-12T07:40:34.637092+00:00",
+  "updated_at": "2026-06-12T07:40:55.688302+00:00",
+  "detected_at": "2026-06-12T07:40:34.637092+00:00",
+  "dismissal": null,
+  "invalidation": {
+   "at": "2026-06-12T07:40:55.688302+00:00",
+   "outcome": "closed without action"
+  },
+  "_missing": 2
+ }
+]
